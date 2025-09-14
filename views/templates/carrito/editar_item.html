@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Item del Carrito - EventLink{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-edit"></i> Editar Item del Carrito
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Información del servicio -->
+                    <div class="alert alert-info">
+                        <h5>{{ item.servicio.nombre if item.servicio else 'N/A' }}</h5>
+                        <p><strong>Proveedor:</strong> {{ item.servicio.proveedor.nombre if item.servicio and item.servicio.proveedor else 'N/A' }}</p>
+                        <p><strong>Categoría:</strong> {{ item.servicio.categoria.value.title() if item.servicio and item.servicio.categoria else 'N/A' }}</p>
+                        <p><strong>Precio Base:</strong> ${{ "%.2f"|format(item.precio_base) }}</p>
+                        {% if item.precio_por_hora %}
+                            <p><strong>Precio por Hora:</strong> ${{ "%.2f"|format(item.precio_por_hora) }}</p>
+                        {% endif %}
+                        {% if item.precio_por_persona %}
+                            <p><strong>Precio por Persona:</strong> ${{ "%.2f"|format(item.precio_por_persona) }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <form method="POST">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="evento_id" class="form-label">Seleccionar Evento</label>
+                                    <select class="form-select" id="evento_id" name="evento_id" required>
+                                        <option value="">Seleccionar evento...</option>
+                                        {% for evento in eventos %}
+                                            <option value="{{ evento.id }}" {% if evento.id == item.evento_id %}selected{% endif %}>
+                                                {{ evento.titulo }} - {{ evento.fecha_inicio.strftime('%d/%m/%Y') }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="fecha_evento" class="form-label">Fecha del Servicio</label>
+                                    <input type="datetime-local" class="form-control" id="fecha_evento" name="fecha_evento" 
+                                           value="{{ item.fecha_evento.strftime('%Y-%m-%dT%H:%M') if item.fecha_evento else '' }}" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="duracion_horas" class="form-label">Duración (horas)</label>
+                                    <input type="number" class="form-control" id="duracion_horas" name="duracion_horas" 
+                                           min="1" max="24" value="{{ item.duracion_horas }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="numero_personas" class="form-label">Número de Personas</label>
+                                    <input type="number" class="form-control" id="numero_personas" name="numero_personas" 
+                                           min="1" value="{{ item.numero_personas or '' }}">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="ubicacion" class="form-label">Ubicación del Servicio</label>
+                            <input type="text" class="form-control" id="ubicacion" name="ubicacion" 
+                                   value="{{ item.ubicacion }}" placeholder="Dirección donde se prestará el servicio" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="notas_especiales" class="form-label">Notas Especiales</label>
+                            <textarea class="form-control" id="notas_especiales" name="notas_especiales" 
+                                      rows="3" placeholder="Requisitos especiales, preferencias, etc.">{{ item.notas_especiales or '' }}</textarea>
+                        </div>
+                        
+                        <!-- Cálculo de precio estimado -->
+                        <div class="alert alert-warning">
+                            <h6>Precio Estimado</h6>
+                            <div id="precio-estimado">
+                                <p>Selecciona un evento y completa los campos para ver el precio estimado</p>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('carrito.ver_carrito') }}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const duracionInput = document.getElementById('duracion_horas');
+    const personasInput = document.getElementById('numero_personas');
+    const precioEstimado = document.getElementById('precio-estimado');
+    
+    const precioBase = {{ item.precio_base }};
+    const precioPorHora = {{ item.precio_por_hora or 0 }};
+    const precioPorPersona = {{ item.precio_por_persona or 0 }};
+    
+    function calcularPrecio() {
+        const duracion = parseFloat(duracionInput.value) || 0;
+        const personas = parseFloat(personasInput.value) || 0;
+        
+        let total = precioBase;
+        
+        if (precioPorHora > 0) {
+            total += precioPorHora * duracion;
+        }
+        
+        if (precioPorPersona > 0) {
+            total += precioPorPersona * personas;
+        }
+        
+        precioEstimado.innerHTML = `
+            <p><strong>Precio Base:</strong> $${precioBase.toFixed(2)}</p>
+            ${precioPorHora > 0 ? `<p><strong>Por ${duracion} horas:</strong> $${(precioPorHora * duracion).toFixed(2)}</p>` : ''}
+            ${precioPorPersona > 0 ? `<p><strong>Por ${personas} personas:</strong> $${(precioPorPersona * personas).toFixed(2)}</p>` : ''}
+            <hr>
+            <p><strong>Total Estimado:</strong> $${total.toFixed(2)}</p>
+        `;
+    }
+    
+    duracionInput.addEventListener('input', calcularPrecio);
+    personasInput.addEventListener('input', calcularPrecio);
+    
+    // Calcular precio inicial
+    calcularPrecio();
+});
+</script>
+{% endblock %}

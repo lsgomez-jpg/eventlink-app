@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle del Pago - EventLink{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-receipt"></i> Detalle del Pago
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Información del Pago</h5>
+                            <p><strong>ID del Pago:</strong> #{{ pago.id }}</p>
+                            <p><strong>Monto:</strong> ${{ "%.2f"|format(pago.monto) }}</p>
+                            <p><strong>Método de Pago:</strong> {{ pago.metodo_pago.value.replace('_', ' ').title() }}</p>
+                            <p><strong>Estado:</strong> 
+                                <span class="badge bg-{% if pago.estado.value == 'aprobado' %}success{% elif pago.estado.value == 'pendiente' %}warning{% elif pago.estado.value == 'rechazado' %}danger{% else %}secondary{% endif %}">
+                                    {{ pago.estado.value.title() }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Información del Pagador</h5>
+                            <p><strong>Nombre:</strong> {{ pago.nombre_titular or 'N/A' }}</p>
+                            <p><strong>Email:</strong> {{ pago.email_pagador or 'N/A' }}</p>
+                            <p><strong>Teléfono:</strong> {{ pago.telefono_pagador or 'N/A' }}</p>
+                            <p><strong>Fecha de Pago:</strong> {{ pago.fecha_pago.strftime('%d/%m/%Y %H:%M') if pago.fecha_pago else 'Pendiente' }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if pago.id_transaccion %}
+                        <div class="mt-4">
+                            <h5>Información de la Transacción</h5>
+                            <p><strong>ID de Transacción:</strong> {{ pago.id_transaccion }}</p>
+                            {% if pago.codigo_autorizacion %}
+                                <p><strong>Código de Autorización:</strong> {{ pago.codigo_autorizacion }}</p>
+                            {% endif %}
+                            {% if pago.referencia_pago %}
+                                <p><strong>Referencia:</strong> {{ pago.referencia_pago }}</p>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Información de la contratación -->
+                    <div class="mt-4">
+                        <h5>Servicio Contratado</h5>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Servicio:</strong></td>
+                                        <td>{{ pago.contratacion.servicio.nombre if pago.contratacion.servicio else 'N/A' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Proveedor:</strong></td>
+                                        <td>{{ pago.contratacion.proveedor.nombre if pago.contratacion.proveedor else 'N/A' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Evento:</strong></td>
+                                        <td>{{ pago.contratacion.evento.titulo if pago.contratacion.evento else 'N/A' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Fecha del Evento:</strong></td>
+                                        <td>{{ pago.contratacion.fecha_evento.strftime('%d/%m/%Y %H:%M') if pago.contratacion.fecha_evento else 'N/A' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Duración:</strong></td>
+                                        <td>{{ pago.contratacion.duracion_horas }} horas</td>
+                                    </tr>
+                                    {% if pago.contratacion.numero_personas %}
+                                        <tr>
+                                            <td><strong>Número de Personas:</strong></td>
+                                            <td>{{ pago.contratacion.numero_personas }}</td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Desglose de costos -->
+                    <div class="mt-4">
+                        <h5>Desglose de Costos</h5>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <tbody>
+                                    <tr>
+                                        <td>Subtotal del Servicio:</td>
+                                        <td class="text-end">${{ "%.2f"|format(pago.monto) }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Comisión de EventLink (10%):</td>
+                                        <td class="text-end">${{ "%.2f"|format(pago.calcular_comision()) }}</td>
+                                    </tr>
+                                    <tr class="table-success">
+                                        <td><strong>Total Pagado:</strong></td>
+                                        <td class="text-end"><strong>${{ "%.2f"|format(pago.monto) }}</strong></td>
+                                    </tr>
+                                    <tr class="table-info">
+                                        <td><strong>Monto para el Proveedor:</strong></td>
+                                        <td class="text-end"><strong>${{ "%.2f"|format(pago.monto_proveedor()) }}</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{{ url_for('pago.listar_pagos') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver a Pagos
+                        </a>
+                        <a href="{{ url_for('contratacion.detalle_contratacion', contratacion_id=pago.contratacion_id) }}" class="btn btn-primary">
+                            <i class="fas fa-eye"></i> Ver Contratación
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

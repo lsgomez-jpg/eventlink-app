@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Mi Perfil - EventLink{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-user"></i> Mi Perfil
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if usuario %}
+                        <form method="POST">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="nombre" class="form-label">Nombre</label>
+                                        <input type="text" class="form-control" id="nombre" name="nombre" 
+                                               value="{{ usuario.nombre }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="apellido" class="form-label">Apellido</label>
+                                        <input type="text" class="form-control" id="apellido" name="apellido" 
+                                               value="{{ usuario.apellido or '' }}">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="correo" class="form-label">Correo Electrónico</label>
+                                        <input type="email" class="form-control" id="correo" name="correo" 
+                                               value="{{ usuario.correo }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="telefono" class="form-label">Teléfono</label>
+                                        <input type="tel" class="form-control" id="telefono" name="telefono" 
+                                               value="{{ usuario.telefono or '' }}">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="ciudad" class="form-label">Ciudad</label>
+                                        <input type="text" class="form-control" id="ciudad" name="ciudad" 
+                                               value="{{ usuario.ciudad or '' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="direccion" class="form-label">Dirección</label>
+                                        <input type="text" class="form-control" id="direccion" name="direccion" 
+                                               value="{{ usuario.direccion or '' }}">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="descripcion" class="form-label">Descripción</label>
+                                <textarea class="form-control" id="descripcion" name="descripcion" rows="3">{{ usuario.descripcion or '' }}</textarea>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="notificaciones_email" 
+                                               name="notificaciones_email" {% if usuario.notificaciones_email %}checked{% endif %}>
+                                        <label class="form-check-label" for="notificaciones_email">
+                                            Notificaciones por Email
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="notificaciones_push" 
+                                               name="notificaciones_push" {% if usuario.notificaciones_push %}checked{% endif %}>
+                                        <label class="form-check-label" for="notificaciones_push">
+                                            Notificaciones Push
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{{ url_for('usuario.estadisticas') }}" class="btn btn-outline-secondary me-md-2">
+                                    <i class="fas fa-chart-bar"></i> Estadísticas
+                                </a>
+                                <a href="{{ url_for('usuario.cambiar_contraseña') }}" class="btn btn-outline-warning me-md-2">
+                                    <i class="fas fa-key"></i> Cambiar Contraseña
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Guardar Cambios
+                                </button>
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            No se pudo cargar la información del perfil.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+

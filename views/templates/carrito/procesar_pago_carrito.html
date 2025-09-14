@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+
+{% block title %}Pago con MercadoPago - EventLink{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-credit-card"></i> Pago con MercadoPago
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Resumen de Items -->
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <h5>Servicios a Pagar</h5>
+                            {% for item in items %}
+                                <div class="card mb-2">
+                                    <div class="card-body py-2">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-6">
+                                                <h6 class="mb-1">{{ item.servicio.nombre }}</h6>
+                                                <small class="text-muted">
+                                                    Evento: {{ item.evento.titulo }}<br>
+                                                    Fecha: {{ item.fecha_evento.strftime('%d/%m/%Y %H:%M') }}
+                                                </small>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <small class="text-muted">
+                                                    Duración: {{ item.duracion_horas }}h<br>
+                                                    Personas: {{ item.numero_personas or 'N/A' }}
+                                                </small>
+                                            </div>
+                                            <div class="col-md-3 text-end">
+                                                <strong class="text-primary">${{ "%.2f"|format(item.precio_total) }}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6>Resumen del Pago</h6>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Subtotal:</span>
+                                        <span>${{ "%.2f"|format(total) }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Impuestos:</span>
+                                        <span>$0.00</span>
+                                    </div>
+                                    <hr>
+                                    <div class="d-flex justify-content-between">
+                                        <strong>Total:</strong>
+                                        <strong class="text-primary">${{ "%.2f"|format(total) }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Formulario de Pago -->
+                    <form method="POST" action="{{ url_for('carrito.procesar_pago') }}">
+                        <h5 class="mb-3">Datos del Pagador</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="nombre_titular" class="form-label">Nombre del Titular *</label>
+                                <input type="text" class="form-control" id="nombre_titular" name="nombre_titular" 
+                                       value="{{ session.get('user_nombre', '') }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email_pagador" class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="email_pagador" name="email_pagador" 
+                                       value="{{ session.get('user_email', '') }}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="telefono_pagador" class="form-label">Teléfono</label>
+                                <input type="tel" class="form-control" id="telefono_pagador" name="telefono_pagador" 
+                                       value="{{ session.get('user_telefono', '') }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="documento_pagador" class="form-label">Documento *</label>
+                                <input type="text" class="form-control" id="documento_pagador" name="documento_pagador" 
+                                       value="{{ session.get('user_documento', '') }}" required>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Datos de la Tarjeta -->
+                        <h5 class="mb-3">Datos de la Tarjeta</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label for="numero_tarjeta" class="form-label">Número de Tarjeta *</label>
+                                <input type="text" class="form-control" id="numero_tarjeta" name="numero_tarjeta" 
+                                       placeholder="1234 5678 9012 3456" maxlength="19" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="cvv" class="form-label">CVV *</label>
+                                <input type="text" class="form-control" id="cvv" name="cvv" 
+                                       placeholder="123" maxlength="4" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="fecha_vencimiento" class="form-label">Fecha de Vencimiento *</label>
+                                <input type="text" class="form-control" id="fecha_vencimiento" name="fecha_vencimiento" 
+                                       placeholder="MM/AA" maxlength="5" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="tipo_tarjeta" class="form-label">Tipo de Tarjeta *</label>
+                                <select class="form-select" id="tipo_tarjeta" name="tipo_tarjeta" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option value="visa">Visa</option>
+                                    <option value="mastercard">Mastercard</option>
+                                    <option value="american_express">American Express</option>
+                                    <option value="diners">Diners Club</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Información de MercadoPago -->
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle"></i> Información de Pago</h6>
+                            <div class="mb-3">
+                                <p class="mb-2"><strong>Modo de Prueba:</strong> Estás en un entorno de desarrollo. Usa las siguientes tarjetas de prueba:</p>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <small class="text-muted">
+                                            <strong>Mastercard:</strong> 5254 1336 7440 3564<br>
+                                            <strong>Visa:</strong> 4013 5406 8274 6260
+                                        </small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted">
+                                            <strong>American Express:</strong> 3743 781877 55283<br>
+                                            <strong>Visa Débito:</strong> 4915 1120 5524 6507
+                                        </small>
+                                    </div>
+                                </div>
+                                <small class="text-muted">CVV: 123 (1234 para Amex) | Vencimiento: 11/30</small>
+                            </div>
+                            <p class="mb-0">En producción, serías redirigido a MercadoPago para completar el pago de forma segura.</p>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('carrito.ver_carrito') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Volver al Carrito
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-credit-card"></i> Procesar Pago - ${{ "%.2f"|format(total) }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Validación y formato del formulario
+document.addEventListener('DOMContentLoaded', function() {
+    // Formatear número de tarjeta
+    const numeroTarjeta = document.getElementById('numero_tarjeta');
+    numeroTarjeta.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
+        let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+        e.target.value = formattedValue;
+        
+        // Detectar tipo de tarjeta
+        detectarTipoTarjeta(value);
+    });
+    
+    // Formatear fecha de vencimiento
+    const fechaVencimiento = document.getElementById('fecha_vencimiento');
+    fechaVencimiento.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 2) {
+            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+        }
+        e.target.value = value;
+    });
+    
+    // Formatear CVV
+    const cvv = document.getElementById('cvv');
+    cvv.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/[^0-9]/g, '');
+    });
+});
+
+function detectarTipoTarjeta(numero) {
+    const tipoTarjeta = document.getElementById('tipo_tarjeta');
+    
+    if (numero.startsWith('4')) {
+        tipoTarjeta.value = 'visa';
+    } else if (numero.startsWith('5') || numero.startsWith('2')) {
+        tipoTarjeta.value = 'mastercard';
+    } else if (numero.startsWith('3')) {
+        tipoTarjeta.value = 'american_express';
+    } else if (numero.startsWith('3')) {
+        tipoTarjeta.value = 'diners';
+    } else {
+        tipoTarjeta.value = '';
+    }
+}
+
+// Validación del formulario
+document.querySelector('form').addEventListener('submit', function(e) {
+    const nombre = document.getElementById('nombre_titular').value.trim();
+    const email = document.getElementById('email_pagador').value.trim();
+    const documento = document.getElementById('documento_pagador').value.trim();
+    const numeroTarjeta = document.getElementById('numero_tarjeta').value.replace(/\s/g, '');
+    const cvv = document.getElementById('cvv').value.trim();
+    const fechaVencimiento = document.getElementById('fecha_vencimiento').value.trim();
+    const tipoTarjeta = document.getElementById('tipo_tarjeta').value;
+    
+    if (!nombre || !email || !documento || !numeroTarjeta || !cvv || !fechaVencimiento || !tipoTarjeta) {
+        e.preventDefault();
+        alert('Por favor completa todos los campos obligatorios (*)');
+        return;
+    }
+    
+    if (!email.includes('@')) {
+        e.preventDefault();
+        alert('Por favor ingresa un email válido');
+        return;
+    }
+    
+    if (numeroTarjeta.length < 13 || numeroTarjeta.length > 19) {
+        e.preventDefault();
+        alert('El número de tarjeta debe tener entre 13 y 19 dígitos');
+        return;
+    }
+    
+    if (cvv.length < 3 || cvv.length > 4) {
+        e.preventDefault();
+        alert('El CVV debe tener entre 3 y 4 dígitos');
+        return;
+    }
+    
+    if (!/^\d{2}\/\d{2}$/.test(fechaVencimiento)) {
+        e.preventDefault();
+        alert('La fecha de vencimiento debe tener el formato MM/AA');
+        return;
+    }
+    
+    // Validar que la fecha no esté vencida
+    const [mes, año] = fechaVencimiento.split('/');
+    const fechaActual = new Date();
+    const añoActual = fechaActual.getFullYear() % 100;
+    const mesActual = fechaActual.getMonth() + 1;
+    
+    if (parseInt(año) < añoActual || (parseInt(año) === añoActual && parseInt(mes) < mesActual)) {
+        e.preventDefault();
+        alert('La tarjeta está vencida');
+        return;
+    }
+    
+    // Mostrar mensaje de confirmación
+    if (!confirm('¿Estás seguro de que quieres procesar este pago?')) {
+        e.preventDefault();
+    }
+});
+</script>
+{% endblock %}

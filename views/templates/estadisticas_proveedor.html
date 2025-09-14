@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Estadísticas - Proveedor - EventLink{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-chart-bar"></i> Mis Estadísticas - Proveedor
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if stats %}
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-cogs fa-2x mb-2"></i>
+                                        <h4>{{ stats.total_servicios }}</h4>
+                                        <p class="mb-0">Total de Servicios</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                        <h4>{{ stats.servicios_activos }}</h4>
+                                        <p class="mb-0">Servicios Activos</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="card bg-warning text-white">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-pause-circle fa-2x mb-2"></i>
+                                        <h4>{{ stats.servicios_inactivos }}</h4>
+                                        <p class="mb-0">Servicios Inactivos</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-chart-pie"></i> Resumen de Servicios</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6>Servicios por Estado</h6>
+                                                <div class="progress mb-2">
+                                                    <div class="progress-bar bg-success" role="progressbar" 
+                                                         style="width: {{ (stats.servicios_activos / stats.total_servicios * 100) if stats.total_servicios > 0 else 0 }}%">
+                                                        Activos: {{ stats.servicios_activos }}
+                                                    </div>
+                                                </div>
+                                                <div class="progress">
+                                                    <div class="progress-bar bg-warning" role="progressbar" 
+                                                         style="width: {{ (stats.servicios_inactivos / stats.total_servicios * 100) if stats.total_servicios > 0 else 0 }}%">
+                                                        Inactivos: {{ stats.servicios_inactivos }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6>Estadísticas Generales</h6>
+                                                <ul class="list-group list-group-flush">
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        Total de Servicios
+                                                        <span class="badge badge-primary badge-pill">{{ stats.total_servicios }}</span>
+                                                    </li>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        Servicios Activos
+                                                        <span class="badge badge-success badge-pill">{{ stats.servicios_activos }}</span>
+                                                    </li>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        Servicios Inactivos
+                                                        <span class="badge badge-warning badge-pill">{{ stats.servicios_inactivos }}</span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            No hay estadísticas disponibles en este momento.
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mt-4">
+                        <a href="{{ url_for('usuario.perfil') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left"></i> Volver al Perfil
+                        </a>
+                        <a href="{{ url_for('servicio.listar_servicios') }}" class="btn btn-primary">
+                            <i class="fas fa-cogs"></i> Ver Mis Servicios
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+

@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Calificar Servicio - EventLink{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-star"></i> Calificar Servicio
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Información del servicio -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Servicio</h5>
+                            <p class="text-muted">{{ contratacion.servicio.nombre }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Proveedor</h5>
+                            <p class="text-muted">{{ contratacion.proveedor.obtener_nombre_completo() }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Evento</h5>
+                            <p class="text-muted">{{ contratacion.evento.titulo }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Fecha del Evento</h5>
+                            <p class="text-muted">{{ contratacion.evento.fecha_evento.strftime('%d/%m/%Y %H:%M') if contratacion.evento.fecha_evento else 'No especificada' }}</p>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <!-- Formulario de calificación -->
+                    <form method="POST">
+                        <div class="form-group mb-4">
+                            <label for="puntuacion" class="form-label">
+                                <strong>Calificación *</strong>
+                            </label>
+                            <div class="rating-input">
+                                <input type="radio" id="star5" name="puntuacion" value="5">
+                                <label for="star5" class="star-label" title="Excelente">★</label>
+                                
+                                <input type="radio" id="star4" name="puntuacion" value="4">
+                                <label for="star4" class="star-label" title="Muy bueno">★</label>
+                                
+                                <input type="radio" id="star3" name="puntuacion" value="3">
+                                <label for="star3" class="star-label" title="Bueno">★</label>
+                                
+                                <input type="radio" id="star2" name="puntuacion" value="2">
+                                <label for="star2" class="star-label" title="Regular">★</label>
+                                
+                                <input type="radio" id="star1" name="puntuacion" value="1">
+                                <label for="star1" class="star-label" title="Malo">★</label>
+                            </div>
+                            <small class="form-text text-muted">Selecciona de 1 a 5 estrellas</small>
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            <label for="comentario" class="form-label">
+                                <strong>Comentario (Opcional)</strong>
+                            </label>
+                            <textarea 
+                                class="form-control" 
+                                id="comentario" 
+                                name="comentario" 
+                                rows="4" 
+                                placeholder="Comparte tu experiencia con este servicio..."
+                                maxlength="500"></textarea>
+                            <small class="form-text text-muted">Máximo 500 caracteres</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-star"></i> Enviar Calificación
+                            </button>
+                            <a href="{{ url_for('contratacion.detalle_contratacion', contratacion_id=contratacion.id) }}" 
+                               class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.rating-input {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 5px;
+}
+
+.rating-input input[type="radio"] {
+    display: none;
+}
+
+.rating-input .star-label {
+    font-size: 2rem;
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.rating-input .star-label:hover,
+.rating-input .star-label:hover ~ .star-label,
+.rating-input input[type="radio"]:checked ~ .star-label {
+    color: #ffc107;
+}
+
+.rating-input input[type="radio"]:checked ~ .star-label {
+    color: #ffc107;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const stars = document.querySelectorAll('.rating-input input[type="radio"]');
+    const labels = document.querySelectorAll('.rating-input .star-label');
+    
+    stars.forEach((star, index) => {
+        star.addEventListener('change', function() {
+            // Remover clase activa de todas las estrellas
+            labels.forEach(label => label.classList.remove('active'));
+            
+            // Agregar clase activa a las estrellas seleccionadas y anteriores
+            for (let i = 0; i <= index; i++) {
+                labels[i].classList.add('active');
+            }
+        });
+    });
+    
+    // Efecto hover
+    labels.forEach((label, index) => {
+        label.addEventListener('mouseenter', function() {
+            // Remover clase activa de todas las estrellas
+            labels.forEach(l => l.classList.remove('hover'));
+            
+            // Agregar clase hover a las estrellas actuales y anteriores
+            for (let i = 0; i <= index; i++) {
+                labels[i].classList.add('hover');
+            }
+        });
+        
+        label.addEventListener('mouseleave', function() {
+            // Remover clase hover de todas las estrellas
+            labels.forEach(l => l.classList.remove('hover'));
+        });
+    });
+});
+</script>
+{% endblock %}

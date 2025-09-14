@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Estadísticas - Organizador - EventLink{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-chart-bar"></i> Mis Estadísticas - Organizador
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if stats %}
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-calendar-alt fa-2x mb-2"></i>
+                                        <h4>{{ stats.total_eventos }}</h4>
+                                        <p class="mb-0">Total de Eventos</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                        <h4>{{ stats.eventos_activos }}</h4>
+                                        <p class="mb-0">Eventos Activos</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="card bg-info text-white">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-flag-checkered fa-2x mb-2"></i>
+                                        <h4>{{ stats.eventos_completados }}</h4>
+                                        <p class="mb-0">Eventos Completados</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-chart-pie"></i> Resumen de Actividad</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6>Eventos por Estado</h6>
+                                                <div class="progress mb-2">
+                                                    <div class="progress-bar bg-success" role="progressbar" 
+                                                         style="width: {{ (stats.eventos_activos / stats.total_eventos * 100) if stats.total_eventos > 0 else 0 }}%">
+                                                        Activos: {{ stats.eventos_activos }}
+                                                    </div>
+                                                </div>
+                                                <div class="progress">
+                                                    <div class="progress-bar bg-info" role="progressbar" 
+                                                         style="width: {{ (stats.eventos_completados / stats.total_eventos * 100) if stats.total_eventos > 0 else 0 }}%">
+                                                        Completados: {{ stats.eventos_completados }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6>Estadísticas Generales</h6>
+                                                <ul class="list-group list-group-flush">
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        Total de Eventos
+                                                        <span class="badge badge-primary badge-pill">{{ stats.total_eventos }}</span>
+                                                    </li>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        Eventos Activos
+                                                        <span class="badge badge-success badge-pill">{{ stats.eventos_activos }}</span>
+                                                    </li>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        Eventos Completados
+                                                        <span class="badge badge-info badge-pill">{{ stats.eventos_completados }}</span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            No hay estadísticas disponibles en este momento.
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mt-4">
+                        <a href="{{ url_for('usuario.perfil') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left"></i> Volver al Perfil
+                        </a>
+                        <a href="{{ url_for('evento.listar_eventos') }}" class="btn btn-primary">
+                            <i class="fas fa-calendar-alt"></i> Ver Mis Eventos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+

@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}{{ evento.titulo }} - EventLink{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">{{ evento.titulo }}</h3>
+                    <span class="badge 
+                        {% if evento.estado.value == 'activo' %}bg-success
+                        {% elif evento.estado.value == 'en_curso' %}bg-warning
+                        {% elif evento.estado.value == 'completado' %}bg-primary
+                        {% elif evento.estado.value == 'cancelado' %}bg-danger
+                        {% else %}bg-secondary{% endif %}">
+                        {{ evento.estado.value.replace('_', ' ').title() }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-info-circle"></i> Información del Evento</h5>
+                            <p><strong>Tipo:</strong> {{ evento.tipo.value.title() }}</p>
+                            <p><strong>Fecha de Inicio:</strong> {{ evento.fecha_inicio.strftime('%d/%m/%Y %H:%M') }}</p>
+                            <p><strong>Fecha de Fin:</strong> {{ evento.fecha_fin.strftime('%d/%m/%Y %H:%M') }}</p>
+                            {% if evento.fecha_evento %}
+                            <p><strong>Fecha del Evento:</strong> {{ evento.fecha_evento.strftime('%d/%m/%Y %H:%M') }}</p>
+                            {% endif %}
+                            <p><strong>Ubicación:</strong> {{ evento.ubicacion }}</p>
+                            <p><strong>Ciudad:</strong> {{ evento.ciudad }}</p>
+                            {% if evento.presupuesto_maximo %}
+                            <p><strong>Presupuesto Máximo:</strong> ${{ "%.2f"|format(evento.presupuesto_maximo) }}</p>
+                            {% endif %}
+                            {% if evento.numero_invitados %}
+                            <p><strong>Número de Invitados:</strong> {{ evento.numero_invitados }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-user"></i> Organizador</h5>
+                            <p><strong>Nombre:</strong> {{ evento.organizador.obtener_nombre_completo() }}</p>
+                            <p><strong>Email:</strong> {{ evento.organizador.correo }}</p>
+                            {% if evento.organizador.telefono %}
+                            <p><strong>Teléfono:</strong> {{ evento.organizador.telefono }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if evento.descripcion %}
+                    <hr>
+                    <h5><i class="fas fa-align-left"></i> Descripción</h5>
+                    <p>{{ evento.descripcion }}</p>
+                    {% endif %}
+                    
+                    <!-- Acciones según el rol y estado -->
+                    <hr>
+                    <div class="d-flex gap-2 flex-wrap">
+                        {% if session.user_rol == 'organizador' and evento.organizador_id == session.user_id %}
+                            <!-- Acciones para organizador -->
+                            {% if evento.estado.value == 'borrador' %}
+                                <a href="{{ url_for('evento.activar_evento', evento_id=evento.id) }}" 
+                                   class="btn btn-success" 
+                                   onclick="return confirm('¿Activar este evento?')">
+                                    <i class="fas fa-play"></i> Activar Evento
+                                </a>
+                            {% elif evento.estado.value == 'activo' %}
+                                <a href="{{ url_for('evento.cancelar_evento', evento_id=evento.id) }}" 
+                                   class="btn btn-danger" 
+                                   onclick="return confirm('¿Cancelar este evento?')">
+                                    <i class="fas fa-times"></i> Cancelar Evento
+                                </a>
+                            {% elif evento.estado.value == 'completado' %}
+                                <a href="{{ url_for('evento.listar_eventos') }}" 
+                                   class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Volver a Eventos
+                                </a>
+                            {% endif %}
+                            
+                            <!-- Opción de calificar (solo si el evento está completado) -->
+                            {% if evento.estado.value == 'completado' %}
+                                <a href="{{ url_for('contratacion.listar_contrataciones') }}" 
+                                   class="btn btn-warning">
+                                    <i class="fas fa-star"></i> Calificar Servicios
+                                </a>
+                            {% endif %}
+                            
+                        {% elif session.user_rol == 'proveedor' %}
+                            <!-- Acciones para proveedor -->
+                            {% if evento.estado.value == 'en_curso' %}
+                                <a href="{{ url_for('evento.finalizar_evento', evento_id=evento.id) }}" 
+                                   class="btn btn-primary" 
+                                   onclick="return confirm('¿Finalizar este evento? Esta acción no se puede deshacer.')">
+                                    <i class="fas fa-flag-checkered"></i> Finalizar Evento
+                                </a>
+                            {% elif evento.estado.value == 'completado' %}
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i> 
+                                    Este evento ha sido finalizado. El organizador puede calificar tu servicio.
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                        
+                        <a href="{{ url_for('evento.listar_eventos') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver a Eventos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Información adicional -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-calendar-alt"></i> Estado del Evento</h5>
+                </div>
+                <div class="card-body">
+                    {% if evento.estado.value == 'borrador' %}
+                        <div class="alert alert-secondary">
+                            <i class="fas fa-edit"></i> El evento está en borrador y no es visible para proveedores.
+                        </div>
+                    {% elif evento.estado.value == 'activo' %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i> El evento está activo y visible para proveedores.
+                        </div>
+                    {% elif evento.estado.value == 'en_curso' %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-clock"></i> El evento está en curso. Los proveedores pueden finalizarlo.
+                        </div>
+                    {% elif evento.estado.value == 'completado' %}
+                        <div class="alert alert-primary">
+                            <i class="fas fa-flag-checkered"></i> El evento ha sido completado. 
+                            {% if session.user_rol == 'organizador' %}
+                                Puedes calificar los servicios.
+                            {% else %}
+                                El organizador puede calificar tu servicio.
+                            {% endif %}
+                        </div>
+                    {% elif evento.estado.value == 'cancelado' %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-times-circle"></i> El evento ha sido cancelado.
+                        </div>
+                    {% endif %}
+                    
+                    <p><strong>Fecha de Creación:</strong> {{ evento.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</p>
+                    <p><strong>Última Actualización:</strong> {{ evento.fecha_actualizacion.strftime('%d/%m/%Y %H:%M') }}</p>
+                </div>
+            </div>
+            
+            <!-- Imágenes del evento -->
+            {% if evento.imagen_principal %}
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5><i class="fas fa-image"></i> Imagen Principal</h5>
+                </div>
+                <div class="card-body">
+                    <img src="{{ url_for('static', filename='uploads/eventos/' + evento.imagen_principal) }}" 
+                         class="img-fluid rounded" alt="Imagen del evento">
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

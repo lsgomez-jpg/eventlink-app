@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Buscar Servicios - EventLink{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-search"></i> Buscar Servicios
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Formulario de búsqueda -->
+                    <form method="GET" action="{{ url_for('servicio.buscar_servicios') }}" class="mb-4">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label for="categoria" class="form-label">Categoría</label>
+                                <select name="categoria" id="categoria" class="form-select">
+                                    <option value="">Todas las categorías</option>
+                                    {% for categoria in categorias %}
+                                        <option value="{{ categoria.value }}" 
+                                                {% if filtros.categoria == categoria.value %}selected{% endif %}>
+                                            {{ categoria.value.title() }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label for="ciudad" class="form-label">Ciudad</label>
+                                <input type="text" name="ciudad" id="ciudad" class="form-control" 
+                                       value="{{ filtros.ciudad or '' }}" placeholder="Ej: Buenos Aires">
+                            </div>
+                            
+                            <div class="col-md-2">
+                                <label for="precio_min" class="form-label">Precio Mín.</label>
+                                <input type="number" name="precio_min" id="precio_min" class="form-control" 
+                                       value="{{ filtros.precio_min or '' }}" placeholder="0" min="0">
+                            </div>
+                            
+                            <div class="col-md-2">
+                                <label for="precio_max" class="form-label">Precio Máx.</label>
+                                <input type="number" name="precio_max" id="precio_max" class="form-control" 
+                                       value="{{ filtros.precio_max or '' }}" placeholder="1000" min="0">
+                            </div>
+                            
+                            <div class="col-md-2">
+                                <label for="calificacion_min" class="form-label">Calificación Mín.</label>
+                                <select name="calificacion_min" id="calificacion_min" class="form-select">
+                                    <option value="">Cualquiera</option>
+                                    <option value="3" {% if filtros.calificacion_min == '3' %}selected{% endif %}>3+ estrellas</option>
+                                    <option value="4" {% if filtros.calificacion_min == '4' %}selected{% endif %}>4+ estrellas</option>
+                                    <option value="5" {% if filtros.calificacion_min == '5' %}selected{% endif %}>5 estrellas</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-3">
+                                <label for="tipo_busqueda" class="form-label">Tipo de Búsqueda</label>
+                                <select name="tipo_busqueda" id="tipo_busqueda" class="form-select">
+                                    <option value="combinada" {% if tipo_busqueda == 'combinada' %}selected{% endif %}>Combinada</option>
+                                    <option value="precio" {% if tipo_busqueda == 'precio' %}selected{% endif %}>Por Precio</option>
+                                    <option value="calificacion" {% if tipo_busqueda == 'calificacion' %}selected{% endif %}>Por Calificación</option>
+                                    <option value="ubicacion" {% if tipo_busqueda == 'ubicacion' %}selected{% endif %}>Por Ubicación</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label for="radio_km" class="form-label">Radio (km)</label>
+                                <input type="number" name="radio_km" id="radio_km" class="form-control" 
+                                       value="{{ filtros.radio_km or '50' }}" placeholder="50" min="1" max="200">
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label for="duracion_horas" class="form-label">Duración (horas)</label>
+                                <input type="number" name="duracion_horas" id="duracion_horas" class="form-control" 
+                                       value="{{ filtros.duracion_horas or '' }}" placeholder="4" min="1">
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label for="numero_personas" class="form-label">Número de Personas</label>
+                                <input type="number" name="numero_personas" id="numero_personas" class="form-control" 
+                                       value="{{ filtros.numero_personas or '' }}" placeholder="20" min="1">
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Buscar Servicios
+                                </button>
+                                <a href="{{ url_for('servicio.buscar_servicios') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times"></i> Limpiar Filtros
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <!-- Resultados de búsqueda -->
+                    {% if servicios %}
+                        <div class="row">
+                            <div class="col-12">
+                                <h5>Resultados de búsqueda ({{ servicios|length }} servicios encontrados)</h5>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            {% for servicio in servicios %}
+                                <div class="col-md-6 col-lg-4 mb-4">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{ servicio.nombre }}</h6>
+                                            <p class="card-text text-muted small">{{ servicio.categoria.value.title() }}</p>
+                                            <p class="card-text">{{ servicio.descripcion[:100] }}{% if servicio.descripcion|length > 100 %}...{% endif %}</p>
+                                            
+                                            <div class="mb-2">
+                                                <span class="badge bg-primary">${{ "%.2f"|format(servicio.precio_base) }}</span>
+                                                {% if servicio.precio_por_hora %}
+                                                    <span class="badge bg-secondary">${{ "%.2f"|format(servicio.precio_por_hora) }}/hora</span>
+                                                {% endif %}
+                                                {% if servicio.precio_por_persona %}
+                                                    <span class="badge bg-info">${{ "%.2f"|format(servicio.precio_por_persona) }}/persona</span>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div class="mb-2">
+                                                <i class="fas fa-map-marker-alt"></i> {{ servicio.ciudad }}
+                                                <span class="badge bg-success">{{ servicio.radio_cobertura }}km</span>
+                                            </div>
+                                            
+                                            {% if servicio.calificacion_promedio > 0 %}
+                                                <div class="mb-2">
+                                                    <span class="text-warning">
+                                                        {% for i in range(servicio.calificacion_promedio|int) %}★{% endfor %}
+                                                        {% for i in range(5 - servicio.calificacion_promedio|int) %}☆{% endfor %}
+                                                    </span>
+                                                    <small class="text-muted">({{ servicio.calificacion_promedio }}/5)</small>
+                                                </div>
+                                            {% endif %}
+                                            
+                                            <div class="d-grid">
+                                                <a href="{{ url_for('servicio.detalle_servicio', servicio_id=servicio.id) }}" 
+                                                   class="btn btn-outline-primary btn-sm">
+                                                    <i class="fas fa-eye"></i> Ver Detalles
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            No se encontraron servicios con los criterios de búsqueda especificados.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+

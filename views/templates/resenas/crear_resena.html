@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Reseña - EventLink{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-star"></i> Crear Reseña
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Información de la contratación -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Servicio Contratado</h5>
+                            <p class="text-muted">{{ contratacion.servicio.nombre }}</p>
+                            <p><strong>Proveedor:</strong> {{ contratacion.servicio.proveedor.nombre }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Evento</h5>
+                            <p class="text-muted">{{ contratacion.evento.nombre }}</p>
+                            <p><strong>Fecha:</strong> {{ contratacion.fecha_evento.strftime('%d/%m/%Y') }}</p>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <!-- Formulario de reseña -->
+                    <form method="POST">
+                        <div class="mb-4">
+                            <label for="puntuacion" class="form-label">
+                                <i class="fas fa-star"></i> Calificación (1-5 estrellas)
+                            </label>
+                            <div class="rating-input">
+                                <input type="radio" id="star5" name="puntuacion" value="5" required>
+                                <label for="star5" class="star">★</label>
+                                
+                                <input type="radio" id="star4" name="puntuacion" value="4">
+                                <label for="star4" class="star">★</label>
+                                
+                                <input type="radio" id="star3" name="puntuacion" value="3">
+                                <label for="star3" class="star">★</label>
+                                
+                                <input type="radio" id="star2" name="puntuacion" value="2">
+                                <label for="star2" class="star">★</label>
+                                
+                                <input type="radio" id="star1" name="puntuacion" value="1">
+                                <label for="star1" class="star">★</label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="comentario" class="form-label">
+                                <i class="fas fa-comment"></i> Comentario (Opcional)
+                            </label>
+                            <textarea class="form-control" id="comentario" name="comentario" 
+                                    rows="4" placeholder="Comparte tu experiencia con este servicio..."></textarea>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('usuario.perfil') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-star"></i> Crear Reseña
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.rating-input {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 5px;
+}
+
+.rating-input input[type="radio"] {
+    display: none;
+}
+
+.rating-input label.star {
+    font-size: 2rem;
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.rating-input input[type="radio"]:checked ~ label.star,
+.rating-input label.star:hover,
+.rating-input label.star:hover ~ label.star {
+    color: #ffc107;
+}
+
+.rating-input input[type="radio"]:checked ~ label.star {
+    color: #ffc107;
+}
+</style>
+{% endblock %}

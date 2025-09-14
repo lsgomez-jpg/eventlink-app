@@ -1,0 +1,37 @@
+{% extends "diseño.html" %}
+{% block titulo %}Registro Organizador - EventLink{% endblock %}
+
+{% block contenido %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+  <div class="panel col-md-6 col-lg-5">
+    <h2 class="text-center mb-4 fw-bold">Registro Organizador</h2>
+
+    <!-- Formulario Organizador -->
+    <form method="POST">
+      <div class="mb-3">
+        <label for="nombre" class="form-label">Nombre completo</label>
+        <input type="text" class="form-control" id="nombre" name="nombre" required>
+      </div>
+      <div class="mb-3">
+        <label for="correo" class="form-label">Correo electrónico</label>
+        <input type="email" class="form-control" id="correo" name="correo" required>
+      </div>
+      <div class="mb-3">
+        <label for="contraseña" class="form-label">Contraseña</label>
+        <input type="password" class="form-control" id="contraseña" name="contraseña" required>
+      </div>
+      <div class="mb-3">
+        <label for="telefono" class="form-label">Teléfono</label>
+        <input type="text" class="form-control" id="telefono" name="telefono">
+      </div>
+
+      <button type="submit" class="btn btn-registro">Registrarse</button>
+    </form>
+
+    <!-- Enlace para volver -->
+    <div class="text-center mt-3">
+      <a href="{{ url_for('login') }}" class="text-decoration-none">¿Ya tienes cuenta? Inicia sesión</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

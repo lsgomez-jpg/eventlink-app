@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle de Contratación{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-file-contract"></i> Detalle de Contratación
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if contratacion %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Información del Servicio</h5>
+                                <p><strong>Servicio:</strong> {{ contratacion.servicio.nombre }}</p>
+                                <p><strong>Proveedor:</strong> {{ contratacion.proveedor.nombre }}</p>
+                                <p><strong>Precio Total:</strong> ${{ "{:,.0f}".format(contratacion.precio_total) }}</p>
+                                <p><strong>Duración:</strong> {{ contratacion.duracion_horas }} horas</p>
+                                {% if contratacion.numero_personas %}
+                                    <p><strong>Número de Personas:</strong> {{ contratacion.numero_personas }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Información del Evento</h5>
+                                <p><strong>Evento:</strong> {{ contratacion.evento.titulo }}</p>
+                                <p><strong>Fecha:</strong> {{ contratacion.fecha_evento.strftime('%d/%m/%Y %H:%M') }}</p>
+                                <p><strong>Ubicación:</strong> {{ contratacion.direccion_evento }}</p>
+                                <p><strong>Estado:</strong> 
+                                    <span class="badge badge-{{ 'success' if contratacion.estado.value == 'completada' else 'warning' if contratacion.estado.value == 'en_progreso' else 'info' }}">
+                                        {{ contratacion.estado.value.title() }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        {% if contratacion.notas_especiales %}
+                            <div class="mt-3">
+                                <h5>Notas Especiales</h5>
+                                <p class="text-muted">{{ contratacion.notas_especiales }}</p>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mt-3">
+                            <h5>Información de Contacto</h5>
+                            <p><strong>Organizador:</strong> {{ contratacion.organizador.nombre }}</p>
+                            <p><strong>Teléfono:</strong> {{ contratacion.contacto_organizador }}</p>
+                        </div>
+                        
+                        {% if contratacion.deposito_requerido %}
+                            <div class="mt-3">
+                                <h5>Información de Pago</h5>
+                                <p><strong>Depósito Requerido:</strong> ${{ "{:,.0f}".format(contratacion.deposito_requerido) }}</p>
+                                <p><strong>Saldo Pendiente:</strong> ${{ "{:,.0f}".format(contratacion.precio_total - contratacion.deposito_requerido) }}</p>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mt-4">
+                            <a href="{{ url_for('contratacion.listar_contrataciones') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Volver a Contrataciones
+                            </a>
+                            
+                            {% if session.get('user_id') == contratacion.organizador_id %}
+                                {% if contratacion.estado.value == 'solicitada' %}
+                                    <a href="{{ url_for('contratacion.cancelar_contratacion', contratacion_id=contratacion.id) }}" 
+                                       class="btn btn-danger" 
+                                       onclick="return confirm('¿Estás seguro de que quieres cancelar esta contratación?')">
+                                        <i class="fas fa-times"></i> Cancelar
+                                    </a>
+                                {% endif %}
+                            {% endif %}
+                            
+                            {% if session.get('user_id') == contratacion.proveedor_id %}
+                                {% if contratacion.estado.value == 'solicitada' %}
+                                    <a href="{{ url_for('contratacion.aceptar_contratacion', contratacion_id=contratacion.id) }}" 
+                                       class="btn btn-success">
+                                        <i class="fas fa-check"></i> Aceptar
+                                    </a>
+                                    <a href="{{ url_for('contratacion.rechazar_contratacion', contratacion_id=contratacion.id) }}" 
+                                       class="btn btn-danger">
+                                        <i class="fas fa-times"></i> Rechazar
+                                    </a>
+                                {% elif contratacion.estado.value == 'aceptada' %}
+                                    <a href="{{ url_for('contratacion.iniciar_servicio', contratacion_id=contratacion.id) }}" 
+                                       class="btn btn-primary">
+                                        <i class="fas fa-play"></i> Iniciar Servicio
+                                    </a>
+                                {% elif contratacion.estado.value == 'en_progreso' %}
+                                    <a href="{{ url_for('contratacion.completar_servicio', contratacion_id=contratacion.id) }}" 
+                                       class="btn btn-success">
+                                        <i class="fas fa-flag-checkered"></i> Finalizar Servicio
+                                    </a>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i> No se encontró la contratación solicitada.
+                        </div>
+                        <a href="{{ url_for('contratacion.listar_contrataciones') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver a Contrataciones
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Información Adicional
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Fecha de Creación:</strong> {{ contratacion.fecha_creacion.strftime('%d/%m/%Y %H:%M') if contratacion else 'N/A' }}</p>
+                    <p><strong>Última Actualización:</strong> {{ contratacion.fecha_actualizacion.strftime('%d/%m/%Y %H:%M') if contratacion else 'N/A' }}</p>
+                    
+                    {% if contratacion and contratacion.estado.value == 'completada' %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i> Esta contratación ha sido completada exitosamente.
+                        </div>
+                    {% elif contratacion and contratacion.estado.value == 'cancelada' %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-times-circle"></i> Esta contratación ha sido cancelada.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

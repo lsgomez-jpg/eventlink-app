@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block title %}{{ servicio.nombre }} - EventLink{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Información principal del servicio -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">{{ servicio.nombre }}</h2>
+                    <p class="text-muted">{{ servicio.categoria.value|title }}</p>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h5>Descripción</h5>
+                            <p>{{ servicio.descripcion }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Ubicación</h5>
+                            <p><i class="fas fa-map-marker-alt"></i> {{ servicio.ciudad }}</p>
+                            <p><i class="fas fa-ruler"></i> Radio de cobertura: {{ servicio.radio_cobertura }} km</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Imágenes de referencia -->
+                    {% if servicio.imagenes_referencia %}
+                    <div class="mb-4">
+                        <h5>Imágenes de Referencia</h5>
+                        <div class="row">
+                            {% for imagen in servicio.imagenes_referencia %}
+                            <div class="col-md-3 mb-3">
+                                <img src="{{ imagen }}" alt="Imagen de referencia" 
+                                     class="img-fluid rounded" style="height: 150px; width: 100%; object-fit: cover;">
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Precios -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Precio Base</h6>
+                                    <h4 class="text-primary">${{ "%.2f"|format(servicio.precio_base) }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        {% if servicio.precio_por_hora %}
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Por Hora</h6>
+                                    <h4 class="text-primary">${{ "%.2f"|format(servicio.precio_por_hora) }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if servicio.precio_por_persona %}
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Por Persona</h6>
+                                    <h4 class="text-primary">${{ "%.2f"|format(servicio.precio_por_persona) }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Detalles del servicio -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h5>Duración</h5>
+                            <p>
+                                {% if servicio.duracion_minima and servicio.duracion_maxima %}
+                                    {{ servicio.duracion_minima }} - {{ servicio.duracion_maxima }} horas
+                                {% elif servicio.duracion_minima %}
+                                    Mínimo {{ servicio.duracion_minima }} horas
+                                {% elif servicio.duracion_maxima %}
+                                    Máximo {{ servicio.duracion_maxima }} horas
+                                {% else %}
+                                    Flexible
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Capacidad</h5>
+                            <p>
+                                {% if servicio.capacidad_maxima %}
+                                    Hasta {{ servicio.capacidad_maxima }} personas
+                                {% else %}
+                                    Sin límite
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Servicios incluidos -->
+                    <div class="mb-3">
+                        <h5>Servicios Incluidos</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    {% if servicio.incluye_materiales %}
+                                    <li><i class="fas fa-check text-success"></i> Materiales incluidos</li>
+                                    {% endif %}
+                                    {% if servicio.incluye_transporte %}
+                                    <li><i class="fas fa-check text-success"></i> Transporte incluido</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    {% if servicio.incluye_montaje %}
+                                    <li><i class="fas fa-check text-success"></i> Montaje incluido</li>
+                                    {% endif %}
+                                    {% if servicio.incluye_desmontaje %}
+                                    <li><i class="fas fa-check text-success"></i> Desmontaje incluido</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Depósito -->
+                    {% if servicio.requiere_deposito %}
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle"></i> Depósito Requerido</h6>
+                        <p>Se requiere un depósito del {{ servicio.porcentaje_deposito }}% del valor total</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Calificaciones -->
+            {% if servicio.calificacion_promedio > 0 %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-star"></i> Calificaciones</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h3 class="text-warning">{{ "%.1f"|format(servicio.calificacion_promedio) }}/5</h3>
+                            <div class="stars">
+                                {% for i in range(5) %}
+                                    {% if i < servicio.calificacion_promedio %}
+                                        <i class="fas fa-star text-warning"></i>
+                                    {% else %}
+                                        <i class="far fa-star text-warning"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="text-muted">Basado en {{ contrataciones|length }} contrataciones</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Acciones -->
+            <div class="card">
+                <div class="card-header">
+                    <h5>Acciones</h5>
+                </div>
+                <div class="card-body">
+                    <!-- CURSOR IA: Mostrar botón de agregar al carrito solo para organizadores -->
+                    {% if puede_agregar_carrito %}
+                        <a href="{{ url_for('servicio.agregar_al_carrito_desde_detalle', servicio_id=servicio.id) }}" 
+                           class="btn btn-primary btn-lg w-100 mb-3">
+                            <i class="fas fa-shopping-cart"></i> Agregar al Carrito
+                        </a>
+                    {% elif not session.user_id %}
+                        <a href="{{ url_for('usuario.login') }}" class="btn btn-primary btn-lg w-100 mb-3">
+                            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión para Contratar
+                        </a>
+                    {% endif %}
+                    
+                    <a href="{{ url_for('servicio.buscar_servicios') }}" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-arrow-left"></i> Volver a Búsqueda
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Información del proveedor -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>Proveedor</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>{{ servicio.proveedor.nombre }} {{ servicio.proveedor.apellido }}</strong></p>
+                    <p><i class="fas fa-envelope"></i> {{ servicio.proveedor.correo }}</p>
+                    {% if servicio.proveedor.telefono %}
+                    <p><i class="fas fa-phone"></i> {{ servicio.proveedor.telefono }}</p>
+                    {% endif %}
+                    {% if servicio.proveedor.ciudad %}
+                    <p><i class="fas fa-map-marker-alt"></i> {{ servicio.proveedor.ciudad }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.stars {
+    font-size: 1.2em;
+}
+</style>
+{% endblock %}
+

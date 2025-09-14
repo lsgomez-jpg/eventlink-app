@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Mi Carrito - EventLink{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-shopping-cart"></i> Mi Carrito</h2>
+                {% if items %}
+                    <div>
+                        <a href="{{ url_for('carrito.limpiar_carrito') }}" class="btn btn-outline-danger me-2" onclick="return confirm('¿Estás seguro de que quieres limpiar el carrito?')">
+                            <i class="fas fa-trash"></i> Limpiar Carrito
+                        </a>
+                {% set items_pendientes = items | selectattr('estado.value', 'equalto', 'pendiente') | list %}
+                {% if items_pendientes %}
+                    <a href="{{ url_for('servicio.catalogo_servicios') }}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-plus"></i> Agregar Más Servicios
+                    </a>
+                    <a href="{{ url_for('carrito.pagar_directo_mercadopago') }}" class="btn btn-primary">
+                        <i class="fas fa-credit-card"></i> Pagar con MercadoPago
+                    </a>
+                {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            {% if items %}
+                {% set items_pendientes = items | selectattr('estado.value', 'equalto', 'pendiente') | list %}
+                {% if items_pendientes|length == 1 %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>¿Necesitas más servicios?</strong> 
+                        Puedes agregar más servicios al mismo evento antes de proceder al pago.
+                    </div>
+                {% endif %}
+                <div class="row">
+                    <div class="col-md-8">
+                        {% for item in items %}
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            {% if item.servicio.imagen_principal %}
+                                                <img src="{{ url_for('static', filename='uploads/servicios/' + item.servicio.imagen_principal) }}" 
+                                                     class="img-fluid rounded" alt="{{ item.servicio.nombre }}">
+                                            {% else %}
+                                                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 120px;">
+                                                    <i class="fas fa-image fa-3x text-muted"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h5 class="card-title">{{ item.servicio.nombre }}</h5>
+                                            <p class="card-text text-muted">{{ item.servicio.descripcion[:100] }}...</p>
+                                            <p class="card-text">
+                                                <strong>Evento:</strong> {{ item.evento.titulo }}<br>
+                                                <strong>Fecha:</strong> {{ item.fecha_evento.strftime('%d/%m/%Y %H:%M') if item.fecha_evento else 'No especificada' }}<br>
+                                                <strong>Duración:</strong> {{ item.duracion_horas }} horas<br>
+                                                <strong>Personas:</strong> {{ item.numero_personas }}<br>
+                                                {% if item.ubicacion %}
+                                                    <strong>Ubicación:</strong> {{ item.ubicacion }}<br>
+                                                {% endif %}
+                                                {% if item.notas_especiales %}
+                                                    <strong>Notas:</strong> {{ item.notas_especiales }}
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                        <div class="col-md-3 text-end">
+                                            <div class="mb-2">
+                                                <span class="h5 text-primary">${{ "%.2f"|format(item.precio_total) }}</span>
+                                            </div>
+                                            <div class="btn-group-vertical w-100">
+                                                {% if item.estado.value == 'pendiente' %}
+                                                    <a href="{{ url_for('carrito.pago_mercadopago', item_id=item.id) }}" class="btn btn-success btn-sm mb-2">
+                                                        <i class="fas fa-credit-card"></i> Pagar con MercadoPago
+                                                    </a>
+                                                {% elif item.estado.value == 'procesando' %}
+                                                    <span class="badge bg-warning mb-2">
+                                                        <i class="fas fa-spinner fa-spin"></i> Procesando...
+                                                    </span>
+                                                {% elif item.estado.value == 'completado' %}
+                                                    <span class="badge bg-success mb-2">
+                                                        <i class="fas fa-check"></i> Completado
+                                                    </span>
+                                                {% endif %}
+                                                
+                                                <a href="{{ url_for('carrito.editar_item', item_id=item.id) }}" class="btn btn-outline-primary btn-sm">
+                                                    <i class="fas fa-edit"></i> Editar
+                                                </a>
+                                                <a href="{{ url_for('carrito.eliminar_item', item_id=item.id) }}" class="btn btn-outline-danger btn-sm" 
+                                                   onclick="return confirm('¿Estás seguro de que quieres eliminar este item?')">
+                                                    <i class="fas fa-trash"></i> Eliminar
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Resumen del Pedido</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Subtotal:</span>
+                                    <span>${{ "%.2f"|format(total) }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Impuestos:</span>
+                                    <span>$0.00</span>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between mb-3">
+                                    <strong>Total:</strong>
+                                    <strong class="text-primary">${{ "%.2f"|format(total) }}</strong>
+                                </div>
+        {% set items_pendientes = items | selectattr('estado.value', 'equalto', 'pendiente') | list %}
+        {% if items_pendientes %}
+            <a href="{{ url_for('carrito.pagar_directo_mercadopago') }}" class="btn btn-primary w-100">
+                <i class="fas fa-credit-card"></i> Pagar con MercadoPago
+            </a>
+        {% else %}
+            <div class="alert alert-info text-center">
+                <i class="fas fa-info-circle"></i> No hay items pendientes de pago
+            </div>
+        {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-shopping-cart fa-5x text-muted mb-3"></i>
+                    <h3 class="text-muted">Tu carrito está vacío</h3>
+                    <p class="text-muted">Agrega algunos servicios para comenzar a planificar tu evento</p>
+                    <a href="{{ url_for('servicio.catalogo_servicios') }}" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Buscar Servicios
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

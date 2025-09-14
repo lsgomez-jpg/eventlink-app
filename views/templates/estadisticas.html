@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Estadísticas - EventLink{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-chart-bar"></i> Mis Estadísticas
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if estadisticas %}
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-dollar-sign fa-2x mb-2"></i>
+                                        <h4>{{ estadisticas.total_pagado | round(2) }}</h4>
+                                        <p class="mb-0">
+                                            {% if estadisticas.rol == 'organizador' %}
+                                                Total Pagado
+                                            {% else %}
+                                                Total Recibido
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="card bg-warning text-white">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-clock fa-2x mb-2"></i>
+                                        <h4>{{ estadisticas.total_pendiente | round(2) }}</h4>
+                                        <p class="mb-0">Total Pendiente</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                        <h4>{{ estadisticas.contrataciones_pagadas }}</h4>
+                                        <p class="mb-0">Contrataciones Pagadas</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="card bg-info text-white">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-star fa-2x mb-2"></i>
+                                        <h4>{{ estadisticas.calificacion_promedio | round(1) }}</h4>
+                                        <p class="mb-0">Calificación Promedio</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if estadisticas.rol == 'organizador' %}
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5><i class="fas fa-calendar-alt"></i> Eventos</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p><strong>Total de Eventos:</strong> {{ estadisticas.total_eventos }}</p>
+                                            <p><strong>Eventos Activos:</strong> {{ estadisticas.eventos_activos }}</p>
+                                            <p><strong>Eventos Completados:</strong> {{ estadisticas.eventos_completados }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5><i class="fas fa-handshake"></i> Contrataciones</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p><strong>Total de Contrataciones:</strong> {{ estadisticas.total_contrataciones }}</p>
+                                            <p><strong>Contrataciones Activas:</strong> {{ estadisticas.contrataciones_activas }}</p>
+                                            <p><strong>Contrataciones Completadas:</strong> {{ estadisticas.contrataciones_completadas }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5><i class="fas fa-cogs"></i> Servicios</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p><strong>Total de Servicios:</strong> {{ estadisticas.total_servicios }}</p>
+                                            <p><strong>Servicios Activos:</strong> {{ estadisticas.servicios_activos }}</p>
+                                            <p><strong>Servicios Inactivos:</strong> {{ estadisticas.servicios_inactivos }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5><i class="fas fa-handshake"></i> Contrataciones</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p><strong>Total de Contrataciones:</strong> {{ estadisticas.total_contrataciones }}</p>
+                                            <p><strong>Contrataciones Activas:</strong> {{ estadisticas.contrataciones_activas }}</p>
+                                            <p><strong>Contrataciones Completadas:</strong> {{ estadisticas.contrataciones_completadas }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            No hay estadísticas disponibles en este momento.
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mt-4">
+                        <a href="{{ url_for('usuario.perfil') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left"></i> Volver al Perfil
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+

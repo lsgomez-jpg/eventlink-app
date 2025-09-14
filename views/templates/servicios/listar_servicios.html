@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Mis Servicios - EventLink{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-cogs"></i> Mis Servicios</h2>
+                <a href="{{ url_for('servicio.crear_servicio') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Crear Nuevo Servicio
+                </a>
+            </div>
+            
+            {% if servicios %}
+                <div class="row">
+                    {% for servicio in servicios %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <span class="badge 
+                                        {% if servicio.estado.value == 'activo' %}bg-success
+                                        {% elif servicio.estado.value == 'inactivo' %}bg-danger
+                                        {% else %}bg-secondary{% endif %}">
+                                        {{ servicio.estado.value.title() }}
+                                    </span>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                                                data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="{{ url_for('servicio.detalle_servicio', servicio_id=servicio.id) }}">
+                                                <i class="fas fa-eye"></i> Ver Detalles
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="{{ url_for('servicio.editar_servicio', servicio_id=servicio.id) }}">
+                                                <i class="fas fa-edit"></i> Editar
+                                            </a></li>
+                                            {% if servicio.estado.value == 'inactivo' %}
+                                                <li><a class="dropdown-item" href="{{ url_for('servicio.activar_servicio', servicio_id=servicio.id) }}" 
+                                                       onclick="return confirm('¿Activar este servicio?')">
+                                                    <i class="fas fa-play"></i> Activar
+                                                </a></li>
+                                            {% else %}
+                                                <li><a class="dropdown-item" href="{{ url_for('servicio.desactivar_servicio', servicio_id=servicio.id) }}" 
+                                                       onclick="return confirm('¿Desactivar este servicio?')">
+                                                    <i class="fas fa-pause"></i> Desactivar
+                                                </a></li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ servicio.nombre }}</h5>
+                                    <p class="card-text">
+                                        <i class="fas fa-tag"></i> {{ servicio.categoria.value.title() }}<br>
+                                        <i class="fas fa-dollar-sign"></i> ${{ "{:,.0f}".format(servicio.precio_base) }}<br>
+                                        <i class="fas fa-map-marker-alt"></i> {{ servicio.cobertura }}
+                                    </p>
+                                    <p class="card-text">
+                                        <small class="text-muted">
+                                            {{ servicio.descripcion[:100] }}{% if servicio.descripcion|length > 100 %}...{% endif %}
+                                        </small>
+                                    </p>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            <i class="fas fa-star"></i> {{ servicio.obtener_calificacion_promedio() | round(1) }}
+                                        </small>
+                                        <small class="text-muted">
+                                            Creado: {{ servicio.fecha_creacion.strftime('%d/%m/%Y') }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-cogs fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No tienes servicios creados</h4>
+                    <p class="text-muted">Comienza creando tu primer servicio</p>
+                    <a href="{{ url_for('servicio.crear_servicio') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Crear Mi Primer Servicio
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+

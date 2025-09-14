@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Servicio - EventLink{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-plus"></i> Crear Nuevo Servicio
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="nombre" class="form-label">Nombre del Servicio</label>
+                                    <input type="text" class="form-control" id="nombre" name="nombre" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="categoria" class="form-label">Categoría</label>
+                                    <select class="form-select" id="categoria" name="categoria" required>
+                                        <option value="">Seleccionar categoría...</option>
+                                        {% for categoria in categorias %}
+                                            <option value="{{ categoria.value }}">{{ categoria.name.replace('_', ' ').title() }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="descripcion" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="precio_base" class="form-label">Precio Base</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" id="precio_base" name="precio_base" 
+                                               min="0" step="1000" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="precio_por_hora" class="form-label">Precio por Hora (Opcional)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" id="precio_por_hora" name="precio_por_hora" 
+                                               min="0" step="100">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="ciudad" class="form-label">Ciudad</label>
+                                    <input type="text" class="form-control" id="ciudad" name="ciudad" 
+                                           placeholder="Ej: Bogotá, Medellín, Cali" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="capacidad_maxima" class="form-label">Capacidad Máxima (Opcional)</label>
+                                    <input type="number" class="form-control" id="capacidad_maxima" name="capacidad_maxima" 
+                                           min="1">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="duracion_minima" class="form-label">Duración Mínima (horas)</label>
+                                    <input type="number" class="form-control" id="duracion_minima" name="duracion_minima" 
+                                           min="1" value="1">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="duracion_maxima" class="form-label">Duración Máxima (horas)</label>
+                                    <input type="number" class="form-control" id="duracion_maxima" name="duracion_maxima" 
+                                           min="1" value="8">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="porcentaje_deposito" class="form-label">Porcentaje de Depósito (Opcional)</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="porcentaje_deposito" name="porcentaje_deposito" 
+                                               min="0" max="100" value="30">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="radio_cobertura" class="form-label">Radio de Cobertura (km)</label>
+                                    <input type="number" class="form-control" id="radio_cobertura" name="radio_cobertura" 
+                                           min="1" value="50">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Imágenes de referencia -->
+                        <div class="mb-4">
+                            <label class="form-label">Imágenes de Referencia (Opcional)</label>
+                            <input type="file" class="form-control" id="imagenes" name="imagenes" 
+                                   multiple accept="image/*">
+                            <div class="form-text">Puedes seleccionar múltiples imágenes para mostrar ejemplos de tu trabajo</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Servicios Incluidos</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="incluye_materiales" name="incluye_materiales">
+                                        <label class="form-check-label" for="incluye_materiales">
+                                            Incluye Materiales
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="incluye_transporte" name="incluye_transporte">
+                                        <label class="form-check-label" for="incluye_transporte">
+                                            Incluye Transporte
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="incluye_montaje" name="incluye_montaje">
+                                        <label class="form-check-label" for="incluye_montaje">
+                                            Incluye Montaje
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="incluye_desmontaje" name="incluye_desmontaje">
+                                        <label class="form-check-label" for="incluye_desmontaje">
+                                            Incluye Desmontaje
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="requiere_deposito" name="requiere_deposito">
+                                <label class="form-check-label" for="requiere_deposito">
+                                    Requiere Depósito
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('servicio.listar_servicios') }}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Crear Servicio
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+

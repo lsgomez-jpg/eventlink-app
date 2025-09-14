@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Notificaciones - EventLink{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-bell"></i> Mis Notificaciones</h2>
+                <div>
+                    <a href="{{ url_for('notificacion.marcar_todas_como_leidas') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-check-double"></i> Marcar Todas como Leídas
+                    </a>
+                    <a href="{{ url_for('usuario.perfil') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver al Perfil
+                    </a>
+                </div>
+            </div>
+            
+            {% if notificaciones %}
+                <div class="row">
+                    {% for notificacion in notificaciones %}
+                        <div class="col-md-12 mb-3">
+                            <div class="card {% if notificacion.estado.value == 'no_leida' %}border-primary{% endif %}">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h5 class="card-title {% if notificacion.estado.value == 'no_leida' %}fw-bold{% endif %}">
+                                                <i class="fas fa-{{ 'exclamation-circle' if notificacion.tipo.value == 'nueva_contratacion' else 'credit-card' if 'pago' in notificacion.tipo.value else 'star' if 'resena' in notificacion.tipo.value else 'info-circle' }} me-2"></i>
+                                                {{ notificacion.titulo }}
+                                            </h5>
+                                            <p class="card-text">{{ notificacion.mensaje }}</p>
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock"></i> {{ notificacion.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}
+                                                {% if notificacion.fecha_lectura %}
+                                                    <span class="ms-3">
+                                                        <i class="fas fa-check"></i> Leída: {{ notificacion.fecha_lectura.strftime('%d/%m/%Y %H:%M') }}
+                                                    </span>
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                {% if notificacion.estado.value == 'no_leida' %}
+                                                    <li>
+                                                        <a class="dropdown-item" href="{{ url_for('notificacion.marcar_como_leida', notificacion_id=notificacion.id) }}">
+                                                            <i class="fas fa-check me-2"></i>Marcar como Leída
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
+                                                <li>
+                                                    <a class="dropdown-item" href="{{ url_for('notificacion.archivar_notificacion', notificacion_id=notificacion.id) }}">
+                                                        <i class="fas fa-archive me-2"></i>Archivar
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-bell fa-5x text-muted mb-3"></i>
+                    <h3 class="text-muted">No tienes notificaciones</h3>
+                    <p class="text-muted">Cuando recibas notificaciones, aparecerán aquí</p>
+                    <a href="{{ url_for('servicio.listar_servicios') }}" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Buscar Servicios
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

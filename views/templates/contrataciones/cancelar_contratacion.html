@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Cancelar Contratación{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-times-circle"></i> Cancelar Contratación
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>¿Estás seguro de que quieres cancelar esta contratación?</strong>
+                        <p class="mb-0 mt-2">Esta acción no se puede deshacer y se notificará al proveedor.</p>
+                    </div>
+
+                    <!-- Información de la contratación -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6><strong>Servicio:</strong></h6>
+                            <p>{{ contratacion.servicio.nombre }}</p>
+                            
+                            <h6><strong>Proveedor:</strong></h6>
+                            <p>{{ contratacion.proveedor.nombre }}</p>
+                            
+                            <h6><strong>Fecha del Evento:</strong></h6>
+                            <p>{{ contratacion.fecha_evento.strftime('%d/%m/%Y %H:%M') }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><strong>Duración:</strong></h6>
+                            <p>{{ contratacion.duracion_horas }} horas</p>
+                            
+                            <h6><strong>Precio Total:</strong></h6>
+                            <p>${{ "%.2f"|format(contratacion.precio_total or 0) }}</p>
+                            
+                            <h6><strong>Estado Actual:</strong></h6>
+                            <span class="badge bg-warning">{{ contratacion.estado.value|title }}</span>
+                        </div>
+                    </div>
+
+                    {% if contratacion.notas_especiales %}
+                    <div class="mb-4">
+                        <h6><strong>Notas Especiales:</strong></h6>
+                        <p class="text-muted">{{ contratacion.notas_especiales }}</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Formulario de cancelación -->
+                    <form method="POST" action="{{ url_for('contratacion.cancelar_contratacion', contratacion_id=contratacion.id) }}">
+                        <div class="mb-3">
+                            <label for="motivo_cancelacion" class="form-label">
+                                <strong>Motivo de la cancelación:</strong>
+                            </label>
+                            <textarea class="form-control" id="motivo_cancelacion" name="motivo_cancelacion" 
+                                      rows="3" placeholder="Explica brevemente el motivo de la cancelación..." required></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('contratacion.detalle_contratacion', contratacion_id=contratacion.id) }}" 
+                               class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Volver
+                            </a>
+                            <button type="submit" class="btn btn-danger" 
+                                    onclick="return confirm('¿Estás completamente seguro de que quieres cancelar esta contratación?')">
+                                <i class="fas fa-times"></i> Confirmar Cancelación
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

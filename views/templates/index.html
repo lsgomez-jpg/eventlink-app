@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+
+{% block title %}EventLink - Inicio{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h1 class="hero-title">BIENVENIDO A EVENTLINK</h1>
+                <p class="hero-description">
+                    La plataforma que conecta organizadores de eventos con los mejores proveedores de servicios
+                </p>
+                {% if not session.user_id %}
+                <div class="hero-buttons">
+                    <a href="{{ url_for('usuario.registro') }}" class="btn btn-primary btn-lg me-3">
+                        <i class="fas fa-user-plus"></i> Regístrate ahora
+                    </a>
+                    <a href="{{ url_for('usuario.login') }}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-sign-in-alt"></i> Inicia sesión
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Carrusel de Imágenes -->
+<div class="carousel-section">
+    <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="3"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="4"></button>
+        </div>
+        
+        <div class="carousel-inner">
+            <!-- Slide 1: Noche de evento -->
+            <div class="carousel-item active">
+                <div class="carousel-image" style="background-image: url('{{ url_for('static', filename='img/nocheevento.jpg') }}');">
+                    <div class="carousel-overlay">
+                        <div class="container">
+                            <div class="row justify-content-center">
+                                <div class="col-lg-8 text-center">
+                                    <h2 class="carousel-title">EVENTOS INOLVIDABLES</h2>
+                                    <p class="carousel-description">
+                                        Organiza eventos únicos con los mejores proveedores de servicios
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 2: Catering -->
+            <div class="carousel-item">
+                <div class="carousel-image" style="background-image: url('{{ url_for('static', filename='img/catering.jpg') }}');">
+                    <div class="carousel-overlay">
+                        <div class="container">
+                            <div class="row justify-content-center">
+                                <div class="col-lg-8 text-center">
+                                    <h1 class="carousel-title">CATERING PROFESIONAL</h1>
+                                    <p class="carousel-description">
+                                        Encuentra los mejores servicios de catering para tu evento con menús personalizados
+                                    </p>
+                                    <div class="carousel-buttons">
+                                        <a href="{{ url_for('servicio.buscar_servicios') }}" class="btn btn-primary btn-lg">
+                                            <i class="fas fa-utensils"></i> Buscar Catering
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 3: Fotografía -->
+            <div class="carousel-item">
+                <div class="carousel-image" style="background-image: url('{{ url_for('static', filename='img/fotografia.jpg') }}');">
+                    <div class="carousel-overlay">
+                        <div class="container">
+                            <div class="row justify-content-center">
+                                <div class="col-lg-8 text-center">
+                                    <h1 class="carousel-title">FOTOGRAFÍA PROFESIONAL</h1>
+                                    <p class="carousel-description">
+                                        Captura los mejores momentos con fotógrafos profesionales especializados en eventos
+                                    </p>
+                                    <div class="carousel-buttons">
+                                        <a href="{{ url_for('servicio.buscar_servicios') }}" class="btn btn-primary btn-lg">
+                                            <i class="fas fa-camera"></i> Buscar Fotógrafos
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 4: Decoración -->
+            <div class="carousel-item">
+                <div class="carousel-image" style="background-image: url('{{ url_for('static', filename='img/decoracion_globos.jpg') }}');">
+                    <div class="carousel-overlay">
+                        <div class="container">
+                            <div class="row justify-content-center">
+                                <div class="col-lg-8 text-center">
+                                    <h1 class="carousel-title">DECORACIÓN CREATIVA</h1>
+                                    <p class="carousel-description">
+                                        Transforma tu evento con decoraciones únicas y creativas que impresionarán a tus invitados
+                                    </p>
+                                    <div class="carousel-buttons">
+                                        <a href="{{ url_for('servicio.buscar_servicios') }}" class="btn btn-primary btn-lg">
+                                            <i class="fas fa-palette"></i> Buscar Decoradores
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 5: DJ -->
+            <div class="carousel-item">
+                <div class="carousel-image" style="background-image: url('{{ url_for('static', filename='img/dj.jpg') }}');">
+                    <div class="carousel-overlay">
+                        <div class="container">
+                            <div class="row justify-content-center">
+                                <div class="col-lg-8 text-center">
+                                    <h1 class="carousel-title">MÚSICA Y ENTRETENIMIENTO</h1>
+                                    <p class="carousel-description">
+                                        Dale vida a tu evento con DJs profesionales y servicios de sonido de alta calidad
+                                    </p>
+                                    <div class="carousel-buttons">
+                                        <a href="{{ url_for('servicio.buscar_servicios') }}" class="btn btn-primary btn-lg">
+                                            <i class="fas fa-music"></i> Buscar DJs
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Controles del carrusel -->
+        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+        </button>
+    </div>
+</div>
+
+<!-- Servicios Destacados -->
+<div class="featured-services-section">
+    <div class="container">
+        <h2 class="section-title text-center mb-5">Nuestros Servicios Destacados</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="service-card">
+                    <div class="service-image">
+                        <img src="{{ url_for('static', filename='img/meseros.jpg') }}" alt="Meseros profesionales" class="img-fluid">
+                        <div class="service-overlay">
+                            <div class="service-icon">
+                                <i class="fas fa-user-tie fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="service-content">
+                        <h5 class="service-name">Meseros Profesionales</h5>
+                        <p class="service-description">Servicio de meseros experimentados para tu evento</p>
+                        <a href="{{ url_for('servicio.buscar_servicios') }}" class="btn btn-outline-primary btn-sm">Ver más</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="service-card">
+                    <div class="service-image">
+                        <img src="{{ url_for('static', filename='img/decoracion_globos.jpg') }}" alt="Decoración con globos" class="img-fluid">
+                        <div class="service-overlay">
+                            <div class="service-icon">
+                                <i class="fas fa-palette fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="service-content">
+                        <h5 class="service-name">Decoración Creativa</h5>
+                        <p class="service-description">Transforma tu evento con decoraciones únicas</p>
+                        <a href="{{ url_for('servicio.buscar_servicios') }}" class="btn btn-outline-primary btn-sm">Ver más</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="service-card">
+                    <div class="service-image">
+                        <img src="{{ url_for('static', filename='img/fotografia.jpg') }}" alt="Fotografía profesional" class="img-fluid">
+                        <div class="service-overlay">
+                            <div class="service-icon">
+                                <i class="fas fa-camera fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="service-content">
+                        <h5 class="service-name">Fotografía Profesional</h5>
+                        <p class="service-description">Captura los mejores momentos de tu evento</p>
+                        <a href="{{ url_for('servicio.buscar_servicios') }}" class="btn btn-outline-primary btn-sm">Ver más</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Segunda fila de servicios -->
+        <div class="row mt-4">
+            <div class="col-md-4 mb-4">
+                <div class="service-card">
+                    <div class="service-image">
+                        <img src="{{ url_for('static', filename='img/catering.jpg') }}" alt="Catering profesional" class="img-fluid">
+                        <div class="service-overlay">
+                            <div class="service-icon">
+                                <i class="fas fa-utensils fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="service-content">
+                        <h5 class="service-name">Catering Profesional</h5>
+                        <p class="service-description">Menús deliciosos para todos los gustos</p>
+                        <a href="{{ url_for('servicio.buscar_servicios') }}" class="btn btn-outline-primary btn-sm">Ver más</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="service-card">
+                    <div class="service-image">
+                        <img src="{{ url_for('static', filename='img/dj.jpg') }}" alt="DJ y música" class="img-fluid">
+                        <div class="service-overlay">
+                            <div class="service-icon">
+                                <i class="fas fa-music fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="service-content">
+                        <h5 class="service-name">DJ y Música</h5>
+                        <p class="service-description">Ambienta tu evento con la mejor música</p>
+                        <a href="{{ url_for('servicio.buscar_servicios') }}" class="btn btn-outline-primary btn-sm">Ver más</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="service-card">
+                    <div class="service-image">
+                        <img src="{{ url_for('static', filename='img/picnic.jpg') }}" alt="Eventos al aire libre" class="img-fluid">
+                        <div class="service-overlay">
+                            <div class="service-icon">
+                                <i class="fas fa-tree fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="service-content">
+                        <h5 class="service-name">Eventos al Aire Libre</h5>
+                        <p class="service-description">Organiza eventos únicos en espacios naturales</p>
+                        <a href="{{ url_for('servicio.buscar_servicios') }}" class="btn btn-outline-primary btn-sm">Ver más</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

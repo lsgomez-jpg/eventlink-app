@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Error del servidor - EventLink{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 text-center">
+        <div class="error-page">
+            <i class="fas fa-server fa-5x text-danger mb-4"></i>
+            <h1 class="display-1 fw-bold text-primary">500</h1>
+            <h2 class="mb-4">Error del servidor</h2>
+            <p class="lead mb-4">
+                Ha ocurrido un error interno del servidor. Nuestro equipo técnico ha sido notificado.
+            </p>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-home me-2"></i>Ir al Inicio
+                </a>
+                <a href="javascript:history.back()" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-arrow-left me-2"></i>Volver Atrás
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+

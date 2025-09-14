@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Mis Eventos - EventLink{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-calendar-alt"></i> Mis Eventos</h2>
+                <a href="{{ url_for('evento.crear_evento') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Crear Nuevo Evento
+                </a>
+            </div>
+            
+            {% if eventos %}
+                <div class="row">
+                    {% for evento in eventos %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <span class="badge 
+                                        {% if evento.estado.value == 'activo' %}bg-success
+                                        {% elif evento.estado.value == 'en_curso' %}bg-warning
+                                        {% elif evento.estado.value == 'completado' %}bg-primary
+                                        {% elif evento.estado.value == 'cancelado' %}bg-danger
+                                        {% else %}bg-secondary{% endif %}">
+                                        {{ evento.estado.value.replace('_', ' ').title() }}
+                                    </span>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                                                data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="{{ url_for('evento.detalle_evento', evento_id=evento.id) }}">
+                                                <i class="fas fa-eye"></i> Ver Detalles
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="{{ url_for('evento.editar_evento', evento_id=evento.id) }}">
+                                                <i class="fas fa-edit"></i> Editar
+                                            </a></li>
+                                            {% if evento.estado.value == 'borrador' %}
+                                                <li><a class="dropdown-item" href="{{ url_for('evento.activar_evento', evento_id=evento.id) }}" 
+                                                       onclick="return confirm('¿Estás seguro de activar este evento?')">
+                                                    <i class="fas fa-play"></i> Activar
+                                                </a></li>
+                                            {% endif %}
+                                            {% if evento.estado.value == 'activo' %}
+                                                <li><a class="dropdown-item" href="{{ url_for('evento.cancelar_evento', evento_id=evento.id) }}" 
+                                                       onclick="return confirm('¿Cancelar este evento?')">
+                                                    <i class="fas fa-times"></i> Cancelar
+                                                </a></li>
+                                            {% elif evento.estado.value == 'en_curso' %}
+                                                <li><a class="dropdown-item" href="{{ url_for('evento.finalizar_evento', evento_id=evento.id) }}" 
+                                                       onclick="return confirm('¿Finalizar este evento?')">
+                                                    <i class="fas fa-flag-checkered"></i> Finalizar
+                                                </a></li>
+                                            {% elif evento.estado.value == 'completado' %}
+                                                <li><a class="dropdown-item" href="{{ url_for('contratacion.listar_contrataciones') }}">
+                                                    <i class="fas fa-star"></i> Calificar Servicios
+                                                </a></li>
+                                            {% endif %}
+                                            {% if evento.estado.value in ['borrador', 'activo'] %}
+                                                <li><a class="dropdown-item text-danger" href="{{ url_for('evento.cancelar_evento', evento_id=evento.id) }}" 
+                                                       onclick="return confirm('¿Estás seguro de cancelar este evento?')">
+                                                    <i class="fas fa-times"></i> Cancelar
+                                                </a></li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ evento.titulo }}</h5>
+                                    <p class="card-text">
+                                        <i class="fas fa-calendar"></i> {{ evento.fecha_evento.strftime('%d/%m/%Y') }}<br>
+                                        <i class="fas fa-clock"></i> {{ evento.fecha_inicio.strftime('%H:%M') }} - {{ evento.fecha_fin.strftime('%H:%M') }}<br>
+                                        <i class="fas fa-map-marker-alt"></i> {{ evento.ciudad }}, {{ evento.direccion }}
+                                    </p>
+                                    <p class="card-text">
+                                        <small class="text-muted">
+                                            <i class="fas fa-users"></i> {{ evento.numero_invitados }} invitados
+                                        </small>
+                                    </p>
+                                </div>
+                                <div class="card-footer">
+                                    <small class="text-muted">
+                                        Creado: {{ evento.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No tienes eventos creados</h4>
+                    <p class="text-muted">Comienza creando tu primer evento</p>
+                    <a href="{{ url_for('evento.crear_evento') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Crear Mi Primer Evento
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+

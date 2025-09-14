@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Catálogo de Servicios{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-store"></i> Catálogo de Servicios</h2>
+                <div>
+                    <a href="{{ url_for('servicio.buscar_servicios') }}" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Búsqueda Avanzada
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros rápidos -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Filtros Rápidos</h5>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <select class="form-select" id="filtroCategoria" onchange="filtrarServicios()">
+                                <option value="">Todas las categorías</option>
+                                {% for categoria in categorias %}
+                                    <option value="{{ categoria.value }}">{{ categoria.value.title() }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="filtroPrecio" onchange="filtrarServicios()">
+                                <option value="">Todos los precios</option>
+                                <option value="0-50000">$0 - $50,000</option>
+                                <option value="50000-100000">$50,000 - $100,000</option>
+                                <option value="100000-200000">$100,000 - $200,000</option>
+                                <option value="200000+">$200,000+</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" id="filtroBusqueda" placeholder="Buscar por nombre..." onkeyup="filtrarServicios()">
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-secondary" onclick="limpiarFiltros()">
+                                <i class="fas fa-times"></i> Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de servicios -->
+    <div class="row" id="serviciosContainer">
+        {% for servicio in servicios %}
+            <div class="col-md-4 mb-4 servicio-item" 
+                 data-categoria="{{ servicio.categoria.value }}" 
+                 data-precio="{{ servicio.precio_base }}"
+                 data-nombre="{{ servicio.nombre.lower() }}">
+                <div class="card h-100">
+                    {% if servicio.imagen_url %}
+                        <img src="{{ servicio.imagen_url }}" class="card-img-top" alt="{{ servicio.nombre }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="fas fa-image fa-3x text-muted"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ servicio.nombre }}</h5>
+                        <p class="card-text text-muted">{{ servicio.descripcion[:100] }}{% if servicio.descripcion|length > 100 %}...{% endif %}</p>
+                        
+                        <div class="mb-2">
+                            <span class="badge bg-primary">{{ servicio.categoria.value.title() }}</span>
+                            {% if servicio.estado.value == 'disponible' %}
+                                <span class="badge bg-success">Disponible</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-2">
+                            <strong>Precio base:</strong> ${{ "{:,.0f}".format(servicio.precio_base) }}
+                        </div>
+                        
+                        <div class="mb-2">
+                            <strong>Proveedor:</strong> {{ servicio.proveedor.nombre }}
+                        </div>
+                        
+                        {% if servicio.calificacion_promedio %}
+                            <div class="mb-2">
+                                <strong>Calificación:</strong>
+                                {% for i in range(5) %}
+                                    {% if i < servicio.calificacion_promedio %}
+                                        <i class="fas fa-star text-warning"></i>
+                                    {% else %}
+                                        <i class="far fa-star text-warning"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                ({{ "%.1f"|format(servicio.calificacion_promedio) }})
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mt-auto">
+                            <a href="{{ url_for('servicio.detalle_servicio', servicio_id=servicio.id) }}" 
+                               class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-eye"></i> Ver Detalles
+                            </a>
+                            <!-- CURSOR IA: Mostrar botón de agregar al carrito solo para organizadores -->
+                            {% if es_organizador %}
+                                <a href="{{ url_for('servicio.agregar_al_carrito_desde_detalle', servicio_id=servicio.id) }}" 
+                                   class="btn btn-success btn-sm">
+                                    <i class="fas fa-shopping-cart"></i> Agregar al Carrito
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if not servicios %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle fa-2x mb-3"></i>
+                    <h4>No hay servicios disponibles</h4>
+                    <p>No se encontraron servicios en el catálogo. Intenta con otros filtros o contacta a los proveedores.</p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function filtrarServicios() {
+    const categoria = document.getElementById('filtroCategoria').value;
+    const precio = document.getElementById('filtroPrecio').value;
+    const busqueda = document.getElementById('filtroBusqueda').value.toLowerCase();
+    
+    const servicios = document.querySelectorAll('.servicio-item');
+    
+    servicios.forEach(servicio => {
+        let mostrar = true;
+        
+        // Filtro por categoría
+        if (categoria && servicio.dataset.categoria !== categoria) {
+            mostrar = false;
+        }
+        
+        // Filtro por precio
+        if (precio && mostrar) {
+            const precioServicio = parseFloat(servicio.dataset.precio);
+            if (precio === '0-50000' && (precioServicio < 0 || precioServicio > 50000)) {
+                mostrar = false;
+            } else if (precio === '50000-100000' && (precioServicio < 50000 || precioServicio > 100000)) {
+                mostrar = false;
+            } else if (precio === '100000-200000' && (precioServicio < 100000 || precioServicio > 200000)) {
+                mostrar = false;
+            } else if (precio === '200000+' && precioServicio < 200000) {
+                mostrar = false;
+            }
+        }
+        
+        // Filtro por búsqueda
+        if (busqueda && mostrar) {
+            const nombreServicio = servicio.dataset.nombre;
+            if (!nombreServicio.includes(busqueda)) {
+                mostrar = false;
+            }
+        }
+        
+        // Mostrar/ocultar servicio
+        if (mostrar) {
+            servicio.style.display = 'block';
+        } else {
+            servicio.style.display = 'none';
+        }
+    });
+}
+
+function limpiarFiltros() {
+    document.getElementById('filtroCategoria').value = '';
+    document.getElementById('filtroPrecio').value = '';
+    document.getElementById('filtroBusqueda').value = '';
+    filtrarServicios();
+}
+</script>
+{% endblock %}

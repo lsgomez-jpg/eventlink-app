@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Servicio - EventLink{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-edit"></i> Editar Servicio
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="nombre" class="form-label">Nombre del Servicio *</label>
+                                    <input type="text" class="form-control" id="nombre" name="nombre" 
+                                           value="{{ servicio.nombre }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="categoria" class="form-label">Categoría *</label>
+                                    <select class="form-select" id="categoria" name="categoria" required>
+                                        {% for categoria in categorias %}
+                                            <option value="{{ categoria.value }}" 
+                                                    {% if servicio.categoria == categoria %}selected{% endif %}>
+                                                {{ categoria.value.title() }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="descripcion" class="form-label">Descripción *</label>
+                            <textarea class="form-control" id="descripcion" name="descripcion" 
+                                    rows="4" required>{{ servicio.descripcion }}</textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="precio_base" class="form-label">Precio Base *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" id="precio_base" 
+                                               name="precio_base" value="{{ servicio.precio_base }}" 
+                                               step="0.01" min="0" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="precio_por_hora" class="form-label">Precio por Hora</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" id="precio_por_hora" 
+                                               name="precio_por_hora" value="{{ servicio.precio_por_hora or '' }}" 
+                                               step="0.01" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="precio_por_persona" class="form-label">Precio por Persona</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" id="precio_por_persona" 
+                                               name="precio_por_persona" value="{{ servicio.precio_por_persona or '' }}" 
+                                               step="0.01" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="ciudad" class="form-label">Ciudad *</label>
+                                    <input type="text" class="form-control" id="ciudad" name="ciudad" 
+                                           value="{{ servicio.ciudad }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="radio_cobertura" class="form-label">Radio de Cobertura (km)</label>
+                                    <input type="number" class="form-control" id="radio_cobertura" 
+                                           name="radio_cobertura" value="{{ servicio.radio_cobertura }}" 
+                                           min="1" max="500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="duracion_minima" class="form-label">Duración Mínima (horas)</label>
+                                    <input type="number" class="form-control" id="duracion_minima" 
+                                           name="duracion_minima" value="{{ servicio.duracion_minima or '' }}" 
+                                           min="1">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="duracion_maxima" class="form-label">Duración Máxima (horas)</label>
+                                    <input type="number" class="form-control" id="duracion_maxima" 
+                                           name="duracion_maxima" value="{{ servicio.duracion_maxima or '' }}" 
+                                           min="1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="capacidad_maxima" class="form-label">Capacidad Máxima (personas)</label>
+                            <input type="number" class="form-control" id="capacidad_maxima" 
+                                   name="capacidad_maxima" value="{{ servicio.capacidad_maxima or '' }}" 
+                                   min="1">
+                        </div>
+
+                        <!-- Imágenes de referencia -->
+                        <div class="mb-4">
+                            <label class="form-label">Imágenes de Referencia</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input type="file" class="form-control" id="imagenes" name="imagenes" 
+                                           multiple accept="image/*">
+                                    <div class="form-text">Puedes seleccionar múltiples imágenes</div>
+                                </div>
+                                <div class="col-md-6">
+                                    {% if servicio.imagenes_referencia %}
+                                        <div class="mt-2">
+                                            <small class="text-muted">Imágenes actuales:</small>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                {% for imagen in servicio.imagenes_referencia %}
+                                                    <img src="{{ imagen }}" alt="Imagen referencia" 
+                                                         class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Checkboxes para características -->
+                        <div class="mb-4">
+                            <label class="form-label">Características del Servicio</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="incluye_materiales" 
+                                               name="incluye_materiales" value="1" 
+                                               {% if servicio.incluye_materiales %}checked{% endif %}>
+                                        <label class="form-check-label" for="incluye_materiales">
+                                            Incluye Materiales
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="incluye_transporte" 
+                                               name="incluye_transporte" value="1" 
+                                               {% if servicio.incluye_transporte %}checked{% endif %}>
+                                        <label class="form-check-label" for="incluye_transporte">
+                                            Incluye Transporte
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="incluye_montaje" 
+                                               name="incluye_montaje" value="1" 
+                                               {% if servicio.incluye_montaje %}checked{% endif %}>
+                                        <label class="form-check-label" for="incluye_montaje">
+                                            Incluye Montaje
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="incluye_desmontaje" 
+                                               name="incluye_desmontaje" value="1" 
+                                               {% if servicio.incluye_desmontaje %}checked{% endif %}>
+                                        <label class="form-check-label" for="incluye_desmontaje">
+                                            Incluye Desmontaje
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Depósito -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="requiere_deposito" 
+                                           name="requiere_deposito" value="1" 
+                                           {% if servicio.requiere_deposito %}checked{% endif %}>
+                                    <label class="form-check-label" for="requiere_deposito">
+                                        Requiere Depósito
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="porcentaje_deposito" class="form-label">Porcentaje de Depósito (%)</label>
+                                    <input type="number" class="form-control" id="porcentaje_deposito" 
+                                           name="porcentaje_deposito" value="{{ servicio.porcentaje_deposito or '' }}" 
+                                           min="0" max="100" step="0.01">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('servicio.listar_servicios') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Actualizar Servicio
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Mostrar/ocultar campo de porcentaje de depósito
+document.getElementById('requiere_deposito').addEventListener('change', function() {
+    const porcentajeField = document.getElementById('porcentaje_deposito');
+    if (this.checked) {
+        porcentajeField.required = true;
+        porcentajeField.parentElement.style.display = 'block';
+    } else {
+        porcentajeField.required = false;
+        porcentajeField.parentElement.style.display = 'none';
+    }
+});
+
+// Inicializar estado del campo de porcentaje
+document.addEventListener('DOMContentLoaded', function() {
+    const requiereDeposito = document.getElementById('requiere_deposito');
+    const porcentajeField = document.getElementById('porcentaje_deposito');
+    
+    if (!requiereDeposito.checked) {
+        porcentajeField.parentElement.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

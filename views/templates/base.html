@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EventLink - Conectando Organizadores y Proveedores{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar - Diseño Figma -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white">
+        <div class="container">
+            <a class="navbar-brand figma-brand" href="{{ url_for('index') }}">
+                EventLink
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link figma-nav-link" href="{{ url_for('index') }}">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link figma-nav-link" href="{{ url_for('servicio.catalogo_servicios') }}">Servicios</a>
+                    </li>
+                    {% if session.user_id %}
+                        {% if session.user_rol == 'organizador' %}
+                            <li class="nav-item">
+                                <a class="nav-link figma-nav-link" href="{{ url_for('evento.crear_evento') }}">Crear</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link figma-nav-link" href="{{ url_for('carrito.ver_carrito') }}">
+                                    <i class="fas fa-shopping-cart me-1"></i>Carrito
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link figma-nav-link" href="{{ url_for('servicio.crear_servicio') }}">Crear</a>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+                
+                <ul class="navbar-nav">
+                    {% if session.user_id %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user me-1"></i>{{ session.user_nombre }}
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('usuario.perfil') }}">
+                                    <i class="fas fa-user me-2"></i>Mi Perfil
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('usuario.estadisticas') }}">
+                                    <i class="fas fa-chart-bar me-2"></i>Estadísticas
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('pago.historial_pagos') }}">
+                                    <i class="fas fa-credit-card me-2"></i>Mis Pagos
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('notificacion.listar_notificaciones') }}">
+                                    <i class="fas fa-bell me-2"></i>Notificaciones
+                                </a></li>
+                                {% if session.user_rol == 'proveedor' %}
+                                <li><a class="dropdown-item" href="{{ url_for('resena.listar_resenas_proveedor') }}">
+                                    <i class="fas fa-star me-2"></i>Mis Reseñas
+                                </a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('usuario.logout') }}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                                </a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="btn btn-primary" href="{{ url_for('usuario.login') }}">
+                                <i class="fas fa-sign-in-alt me-1"></i>Iniciar Sesión
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mt-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'check-circle' if category == 'success' else 'info-circle' }} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="container mt-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-link me-2"></i>EventLink</h5>
+                    <p class="mb-0">Conectando organizadores de eventos con proveedores de servicios de forma segura y eficiente.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <h6>Enlaces Útiles</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-light">Términos y Condiciones</a></li>
+                        <li><a href="#" class="text-light">Política de Privacidad</a></li>
+                        <li><a href="#" class="text-light">Soporte</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-3">
+            <div class="text-center">
+                <p class="mb-0">&copy; 2024 EventLink. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

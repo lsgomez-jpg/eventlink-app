@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}Procesar Pago - EventLink{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-credit-card"></i> Procesar Pago
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Resumen del pago -->
+                    <div class="alert alert-info">
+                        {% if contratacion %}
+                            <!-- Pago individual -->
+                            <h5>Resumen del Servicio</h5>
+                            <p><strong>Servicio:</strong> {{ contratacion.servicio.nombre if contratacion.servicio else 'N/A' }}</p>
+                            <p><strong>Proveedor:</strong> {{ contratacion.proveedor.nombre if contratacion.proveedor else 'N/A' }}</p>
+                            <p><strong>Evento:</strong> {{ contratacion.evento.titulo if contratacion.evento else 'N/A' }}</p>
+                            <p><strong>Fecha del Evento:</strong> {{ contratacion.fecha_evento.strftime('%d/%m/%Y %H:%M') if contratacion.fecha_evento else 'N/A' }}</p>
+                            <hr>
+                            <h6><strong>Total a Pagar: ${{ "%.2f"|format(contratacion.precio_total) if contratacion.precio_total else '0.00' }}</strong></h6>
+                        {% elif items %}
+                            <!-- Pago del carrito -->
+                            <h5>Resumen del Carrito</h5>
+                            {% for item in items %}
+                                <div class="d-flex justify-content-between">
+                                    <span><strong>{{ item.servicio.nombre }}</strong> - {{ item.evento.titulo }}</span>
+                                    <span>${{ "%.2f"|format(item.precio_total) }}</span>
+                                </div>
+                            {% endfor %}
+                            <hr>
+                            <h6><strong>Total a Pagar: ${{ "%.2f"|format(total) if total else '0.00' }}</strong></h6>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Formulario de pago simplificado -->
+                    <form id="payment-form" method="POST">
+                        <!-- Método de pago fijo (solo MercadoPago) -->
+                        <div class="mb-3">
+                            <label class="form-label">Método de Pago</label>
+                            <div class="form-control-plaintext">
+                                <span class="badge bg-primary fs-6">
+                                    <i class="fas fa-credit-card me-2"></i>MercadoPago
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Información del pagador -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="nombre_titular" class="form-label">Nombre del Titular *</label>
+                                    <input type="text" class="form-control" id="nombre_titular" name="nombre_titular" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="email_pagador" class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="email_pagador" name="email_pagador" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="telefono_pagador" class="form-label">Teléfono</label>
+                                    <input type="tel" class="form-control" id="telefono_pagador" name="telefono_pagador">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="documento_pagador" class="form-label">Documento de Identidad *</label>
+                                    <input type="text" class="form-control" id="documento_pagador" name="documento_pagador" placeholder="Número de documento" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Información de la Tarjeta (MercadoPago) -->
+                        <div id="mercadopago-fields" class="mb-4">
+                            <h5><i class="fas fa-credit-card"></i> Información de la Tarjeta</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="card_number" class="form-label">Número de Tarjeta *</label>
+                                        <input type="text" class="form-control" id="card_number" name="card_number" placeholder="1234 5678 9012 3456" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label for="expiry_date" class="form-label">Fecha de Vencimiento *</label>
+                                        <input type="text" class="form-control" id="expiry_date" name="expiry_date" placeholder="MM/AA" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label for="cvv" class="form-label">CVV *</label>
+                                        <input type="text" class="form-control" id="cvv" name="cvv" placeholder="123" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between">
+                            {% if contratacion %}
+                                <a href="{{ url_for('contratacion.detalle_contratacion', contratacion_id=contratacion.id) }}" class="btn btn-outline-secondary me-md-2">
+                                    <i class="fas fa-arrow-left"></i> Cancelar
+                                </a>
+                            {% elif items %}
+                                <a href="{{ url_for('carrito.ver_carrito') }}" class="btn btn-outline-secondary me-md-2">
+                                    <i class="fas fa-arrow-left"></i> Volver al Carrito
+                                </a>
+                            {% endif %}
+                            <button type="submit" id="submit-button" class="btn btn-primary">
+                                <i class="fas fa-credit-card"></i> Procesar Pago
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validar formulario antes de enviar
+    document.getElementById('payment-form').addEventListener('submit', function(e) {
+        const nombreTitular = document.getElementById('nombre_titular').value;
+        const emailPagador = document.getElementById('email_pagador').value;
+        const documentoPagador = document.getElementById('documento_pagador').value;
+        
+        // Validaciones básicas
+        if (!nombreTitular) {
+            e.preventDefault();
+            showError('El nombre del titular es obligatorio');
+            return;
+        }
+        
+        if (!emailPagador) {
+            e.preventDefault();
+            showError('El email es obligatorio');
+            return;
+        }
+        
+        if (!documentoPagador) {
+            e.preventDefault();
+            showError('El documento es obligatorio');
+            return;
+        }
+        
+        // Validaciones para MercadoPago (siempre requerido)
+        const cardNumber = document.getElementById('card_number').value;
+        const expiryDate = document.getElementById('expiry_date').value;
+        const cvv = document.getElementById('cvv').value;
+        
+        if (!cardNumber || !expiryDate || !cvv) {
+            e.preventDefault();
+            showError('Debes completar todos los campos de la tarjeta');
+            return;
+        }
+        
+        // Mostrar loading en el botón
+        const submitButton = document.getElementById('submit-button');
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+    });
+    
+    // Formatear número de tarjeta
+    document.getElementById('card_number').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
+        let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+        e.target.value = formattedValue;
+    });
+    
+    // Formatear fecha de vencimiento
+    document.getElementById('expiry_date').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 2) {
+            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+        }
+        e.target.value = value;
+    });
+    
+    // Formatear CVV
+    document.getElementById('cvv').addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/\D/g, '').substring(0, 4);
+    });
+});
+
+function showError(message) {
+    // Crear alerta de error
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+    alertDiv.innerHTML = `
+        <i class="fas fa-exclamation-triangle"></i> ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Insertar antes del formulario
+    const form = document.getElementById('payment-form');
+    form.parentNode.insertBefore(alertDiv, form);
+    
+    // Auto-remover después de 5 segundos
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+</script>
+
+<style>
+/* Estilos para el formulario de MercadoPago */
+#mercadopago-fields {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 1rem;
+}
+
+#mercadopago-fields .form-control {
+    margin-bottom: 1rem;
+}
+
+#mercadopago-fields .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+</style>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Historial de Pagos - EventLink{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-credit-card"></i> Historial de Pagos</h2>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver al Inicio
+                </a>
+            </div>
+            
+            {% if pagos %}
+                <div class="row">
+                    {% for pago in pagos %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h5 class="card-title">Pago #{{ pago.id }}</h5>
+                                        <span class="badge 
+                                            {% if pago.estado.value == 'aprobado' %}bg-success
+                                            {% elif pago.estado.value == 'pendiente' %}bg-warning
+                                            {% elif pago.estado.value == 'rechazado' %}bg-danger
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ pago.estado.value.title() }}
+                                        </span>
+                                    </div>
+                                    
+                                    <p class="card-text">
+                                        <strong>Monto:</strong> ${{ "%.2f"|format(pago.monto) }}<br>
+                                        <strong>Método:</strong> {{ pago.metodo_pago.value.title() }}<br>
+                                        <strong>Titular:</strong> {{ pago.nombre_titular }}<br>
+                                        <strong>Email:</strong> {{ pago.email_pagador }}<br>
+                                        <strong>Fecha:</strong> {{ pago.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}
+                                    </p>
+                                    
+                                    {% if pago.contratacion %}
+                                        <p class="card-text">
+                                            <strong>Servicio:</strong> {{ pago.contratacion.servicio.nombre if pago.contratacion.servicio else 'N/A' }}<br>
+                                            <strong>Evento:</strong> {{ pago.contratacion.evento.titulo if pago.contratacion.evento else 'N/A' }}
+                                        </p>
+                                    {% endif %}
+                                    
+                                    <div class="d-flex justify-content-between">
+                                        <a href="{{ url_for('pago.detalle_pago', pago_id=pago.id) }}" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-eye"></i> Ver Detalle
+                                        </a>
+                                        {% if pago.id_transaccion %}
+                                            <small class="text-muted">
+                                                ID: {{ pago.id_transaccion[:10] }}...
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-credit-card fa-5x text-muted mb-3"></i>
+                    <h3 class="text-muted">No tienes pagos registrados</h3>
+                    <p class="text-muted">Cuando realices un pago, aparecerá aquí</p>
+                    <a href="{{ url_for('servicio.listar_servicios') }}" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Buscar Servicios
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

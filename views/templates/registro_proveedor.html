@@ -1,0 +1,50 @@
+{% extends "diseño.html" %}
+{% block titulo %}Registro Proveedor - EventLink{% endblock %}
+
+{% block contenido %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+  <div class="panel col-md-6 col-lg-5">
+    <h2 class="text-center mb-4 fw-bold">Registro Proveedor de Servicios</h2>
+
+    <!-- Formulario Proveedor -->
+    <form method="POST">
+      <div class="mb-3">
+        <label for="nombre" class="form-label">Nombre o empresa</label>
+        <input type="text" class="form-control" id="nombre" name="nombre" required>
+      </div>
+      <div class="mb-3">
+        <label for="correo" class="form-label">Correo electrónico</label>
+        <input type="email" class="form-control" id="correo" name="correo" required>
+      </div>
+      <div class="mb-3">
+        <label for="contraseña" class="form-label">Contraseña</label>
+        <input type="password" class="form-control" id="contraseña" name="contraseña" required>
+      </div>
+      <div class="mb-3">
+        <label for="servicio" class="form-label">Tipo de servicio</label>
+        <select class="form-select" id="servicio" name="servicio" required>
+        <option value="">Seleccione...</option>
+          <option value="catering">🍽️ Catering</option>
+          <option value="musica">🎶 Música y sonido</option>
+          <option value="decoracion">🎀 Decoración</option>
+          <option value="fotografia">📸 Fotografía</option>
+          <option value="video">🎥 Video y producción</option>
+          <option value="luces">💡 Iluminación</option>
+          <option value="espacio">🏢 Alquiler de espacios</option>
+          <option value="transporte">🚌 Transporte</option>
+          <option value="seguridad">🛡️ Seguridad</option>
+          <option value="otros">✨ Otros</option>
+        </select>
+       
+      </div>
+
+      <button type="submit" class="btn btn-registro">Registrarse</button>
+    </form>
+
+    <!-- Enlace para volver -->
+    <div class="text-center mt-3">
+      <a href="{{ url_for('login') }}" class="text-decoration-none">¿Ya tienes cuenta? Inicia sesión</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

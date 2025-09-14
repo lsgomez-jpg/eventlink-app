@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+
+{% block title %}Agregar al Carrito - {{ servicio.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-shopping-cart me-2"></i>
+                        Agregar al Carrito
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Información del servicio -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            {% if servicio.imagen_url %}
+                                <img src="{{ servicio.imagen_url }}" class="img-fluid rounded" alt="{{ servicio.nombre }}">
+                            {% else %}
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="fas fa-image fa-3x text-muted"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h5>{{ servicio.nombre }}</h5>
+                            <p class="text-muted">{{ servicio.descripcion }}</p>
+                            <div class="row">
+                                <div class="col-6">
+                                    <strong>Precio Base:</strong> ${{ "%.2f"|format(servicio.precio_base) }}
+                                </div>
+                                <div class="col-6">
+                                    <strong>Categoría:</strong> {{ servicio.categoria.value }}
+                                </div>
+                            </div>
+                            {% if servicio.precio_por_hora %}
+                                <div class="row mt-2">
+                                    <div class="col-6">
+                                        <strong>Precio por Hora:</strong> ${{ "%.2f"|format(servicio.precio_por_hora) }}
+                                    </div>
+                                </div>
+                            {% endif %}
+                            {% if servicio.precio_por_persona %}
+                                <div class="row mt-2">
+                                    <div class="col-6">
+                                        <strong>Precio por Persona:</strong> ${{ "%.2f"|format(servicio.precio_por_persona) }}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Formulario para agregar al carrito -->
+                    <form method="POST" id="formAgregarCarrito">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="evento_id" class="form-label">Seleccionar Evento *</label>
+                                    <select class="form-select" id="evento_id" name="evento_id" required onchange="cargarDatosEvento()">
+                                        <option value="">Selecciona un evento</option>
+                                        {% for evento in eventos %}
+                                            <option value="{{ evento.id }}" 
+                                                    data-fecha-inicio="{{ evento.fecha_inicio.strftime('%Y-%m-%dT%H:%M') if evento.fecha_inicio else '' }}"
+                                                    data-fecha-fin="{{ evento.fecha_fin.strftime('%Y-%m-%dT%H:%M') if evento.fecha_fin else '' }}"
+                                                    data-numero-invitados="{{ evento.numero_invitados or '' }}"
+                                                    data-ubicacion="{{ evento.ubicacion or '' }}"
+                                                    data-direccion="{{ evento.direccion or '' }}">
+                                                {{ evento.titulo }} - {{ evento.fecha_inicio.strftime('%d/%m/%Y') if evento.fecha_inicio else 'Sin fecha' }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="fecha_evento" class="form-label">Fecha del Servicio *</label>
+                                    <input type="datetime-local" class="form-control" id="fecha_evento" name="fecha_evento" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="duracion_horas" class="form-label">Duración (horas) *</label>
+                                    <input type="number" class="form-control" id="duracion_horas" name="duracion_horas" 
+                                           min="1" max="24" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="numero_personas" class="form-label">Número de Personas</label>
+                                    <input type="number" class="form-control" id="numero_personas" name="numero_personas" 
+                                           min="1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="ubicacion" class="form-label">Ubicación *</label>
+                                    <input type="text" class="form-control" id="ubicacion" name="ubicacion" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="notas_especiales" class="form-label">Notas Especiales</label>
+                                    <textarea class="form-control" id="notas_especiales" name="notas_especiales" 
+                                              rows="3" placeholder="Especificaciones adicionales, requerimientos especiales, etc."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resumen de precios -->
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title">Resumen de Precios</h6>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <span>Precio Base:</span>
+                                    </div>
+                                    <div class="col-6 text-end">
+                                        <span id="precio_base">${{ "%.2f"|format(servicio.precio_base) }}</span>
+                                    </div>
+                                </div>
+                                <div class="row" id="precio_por_hora_row" style="display: none;">
+                                    <div class="col-6">
+                                        <span>Precio por Hora:</span>
+                                    </div>
+                                    <div class="col-6 text-end">
+                                        <span id="precio_por_hora">$0.00</span>
+                                    </div>
+                                </div>
+                                <div class="row" id="precio_por_persona_row" style="display: none;">
+                                    <div class="col-6">
+                                        <span>Precio por Persona:</span>
+                                    </div>
+                                    <div class="col-6 text-end">
+                                        <span id="precio_por_persona">$0.00</span>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <strong>Total Estimado:</strong>
+                                    </div>
+                                    <div class="col-6 text-end">
+                                        <strong id="total_estimado">${{ "%.2f"|format(servicio.precio_base) }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('servicio.detalle_servicio', servicio_id=servicio.id) }}" 
+                               class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-arrow-left"></i> Volver
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-credit-card"></i> Proceder al Pago
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Información del Servicio</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Proveedor:</strong><br>
+                        <span class="text-muted">{{ servicio.proveedor.nombre }} {{ servicio.proveedor.apellido }}</span>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Ciudad:</strong><br>
+                        <span class="text-muted">{{ servicio.ciudad }}</span>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Radio de Cobertura:</strong><br>
+                        <span class="text-muted">{{ servicio.radio_cobertura }} km</span>
+                    </div>
+                    {% if servicio.calificacion_promedio > 0 %}
+                        <div class="mb-3">
+                            <strong>Calificación:</strong><br>
+                            <span class="text-warning">
+                                {% for i in range(servicio.calificacion_promedio|int) %}★{% endfor %}
+                                {% for i in range(5 - servicio.calificacion_promedio|int) %}☆{% endfor %}
+                            </span>
+                            <span class="text-muted">({{ servicio.calificacion_promedio }}/5)</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function cargarDatosEvento() {
+    const selectEvento = document.getElementById('evento_id');
+    const optionSeleccionada = selectEvento.options[selectEvento.selectedIndex];
+    
+    if (optionSeleccionada.value) {
+        // Autocompletar campos con datos del evento
+        document.getElementById('fecha_evento').value = optionSeleccionada.dataset.fechaInicio || '';
+        document.getElementById('numero_personas').value = optionSeleccionada.dataset.numeroInvitados || '';
+        document.getElementById('ubicacion').value = optionSeleccionada.dataset.ubicacion || '';
+        
+        // Calcular duración estimada basada en el evento
+        const fechaInicio = optionSeleccionada.dataset.fechaInicio;
+        const fechaFin = optionSeleccionada.dataset.fechaFin;
+        
+        if (fechaInicio && fechaFin) {
+            const inicio = new Date(fechaInicio);
+            const fin = new Date(fechaFin);
+            const duracionMs = fin - inicio;
+            const duracionHoras = Math.round(duracionMs / (1000 * 60 * 60));
+            
+            if (duracionHoras > 0) {
+                document.getElementById('duracion_horas').value = duracionHoras;
+            }
+        }
+        
+        // Recalcular precios
+        calcularPrecios();
+    } else {
+        // Limpiar campos si no hay evento seleccionado
+        document.getElementById('fecha_evento').value = '';
+        document.getElementById('numero_personas').value = '';
+        document.getElementById('ubicacion').value = '';
+        document.getElementById('duracion_horas').value = '';
+    }
+}
+
+function calcularPrecios() {
+    const duracion = parseInt(document.getElementById('duracion_horas').value) || 0;
+    const numeroPersonas = parseInt(document.getElementById('numero_personas').value) || 0;
+    
+    const precioBase = {{ servicio.precio_base }};
+    const precioPorHora = {{ servicio.precio_por_hora or 0 }};
+    const precioPorPersona = {{ servicio.precio_por_persona or 0 }};
+    
+    let total = precioBase;
+    
+    // Mostrar/ocultar precios por hora y por persona
+    const precioPorHoraRow = document.getElementById('precio_por_hora_row');
+    const precioPorPersonaRow = document.getElementById('precio_por_persona_row');
+    
+    if (precioPorHora > 0 && duracion > 0) {
+        const subtotalHora = precioPorHora * duracion;
+        total += subtotalHora;
+        document.getElementById('precio_por_hora').textContent = '$' + subtotalHora.toFixed(2);
+        precioPorHoraRow.style.display = 'block';
+    } else {
+        precioPorHoraRow.style.display = 'none';
+    }
+    
+    if (precioPorPersona > 0 && numeroPersonas > 0) {
+        const subtotalPersona = precioPorPersona * numeroPersonas;
+        total += subtotalPersona;
+        document.getElementById('precio_por_persona').textContent = '$' + subtotalPersona.toFixed(2);
+        precioPorPersonaRow.style.display = 'block';
+    } else {
+        precioPorPersonaRow.style.display = 'none';
+    }
+    
+    document.getElementById('total_estimado').textContent = '$' + total.toFixed(2);
+}
+
+// Event listeners para recalcular precios
+document.getElementById('duracion_horas').addEventListener('input', calcularPrecios);
+document.getElementById('numero_personas').addEventListener('input', calcularPrecios);
+
+// Validación del formulario
+document.getElementById('formAgregarCarrito').addEventListener('submit', function(e) {
+    const eventoId = document.getElementById('evento_id').value;
+    const fechaEvento = document.getElementById('fecha_evento').value;
+    const duracion = document.getElementById('duracion_horas').value;
+    const ubicacion = document.getElementById('ubicacion').value;
+    
+    if (!eventoId || !fechaEvento || !duracion || !ubicacion) {
+        e.preventDefault();
+        alert('Por favor completa todos los campos obligatorios.');
+        return false;
+    }
+    
+    // Validar que la fecha del servicio no sea anterior a hoy
+    const fechaServicio = new Date(fechaEvento);
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    
+    if (fechaServicio < hoy) {
+        e.preventDefault();
+        alert('La fecha del servicio no puede ser anterior a hoy.');
+        return false;
+    }
+});
+</script>
+{% endblock %}
