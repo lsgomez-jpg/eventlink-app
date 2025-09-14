@@ -1,8 +1,5 @@
 # controllers/servicio_controller.py
-"""
-Controlador para gestión de servicios
-Principio SOLID: Single Responsibility - Responsabilidad única para servicios
-"""
+
 
 from flask import request, session, flash, redirect, url_for, render_template, jsonify
 from models.servicio import Servicio, CategoriaServicio, EstadoServicio
