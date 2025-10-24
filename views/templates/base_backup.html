@@ -3,26 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-    /* CSS Crítico para Above-the-Fold */
-    .hero-section { padding: 80px 0; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); }
-    .hero-title { font-size: 3rem; font-weight: 700; color: #1A1A1A; margin-bottom: 1.5rem; }
-    .hero-description { font-size: 1.2rem; color: #666666; margin-bottom: 2rem; }
-    .navbar { display: flex; align-items: center; padding: 1rem 0; background: #fff; border-bottom: 1px solid #CCCCCC; }
-    .navbar-brand { font-weight: 600; font-size: 1.5rem; color: #0066CC; text-decoration: none; }
-    .btn { display: inline-block; padding: 12px 24px; border: 1px solid transparent; border-radius: 8px; text-decoration: none; font-weight: 600; }
-    .btn-primary { background-color: #0066CC; color: #fff; }
-    .btn-outline-primary { border: 1px solid #0066CC; color: #0066CC; background: transparent; }
-    </style>
-    
     <title>{% block title %}EventLink - Conectando Organizadores y Proveedores{% endblock %}</title>
     
-    <!-- CSS Optimizado - Reducir llamadas -->
+    <!-- CSS Crítico - Carga inmediata -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <!-- Font Awesome solo cuando se necesite -->
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"></noscript>
     
     {% block extra_css %}{% endblock %}
 </head>
@@ -120,23 +106,19 @@
         </div>
     </footer>
 
-    <!-- JavaScript Optimizado - Carga diferida -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+    <!-- JavaScript - Carga inmediata -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     
     {% block extra_js %}{% endblock %}
 
-    <!-- Service Worker Optimizado -->
+    <!-- Service Worker -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('{{ url_for('static', filename='sw.js') }}')
-                    .then(registration => {
-                        console.log('SW registered:', registration);
-                        // Precargar recursos críticos
-                        registration.update();
-                    })
-                    .catch(error => console.log('SW registration failed:', error));
+                    .then(registration => console.log('SW registered'))
+                    .catch(error => console.log('SW registration failed'));
             });
         }
     </script>

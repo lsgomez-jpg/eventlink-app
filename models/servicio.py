@@ -54,6 +54,9 @@ class Servicio(db.Model):
     radio_cobertura = db.Column(db.Integer, default=50)  # en kilómetros
     
     # Imágenes de referencia
+    imagen_principal = db.Column(db.String(500), nullable=True)
+    imagen_secundaria = db.Column(db.String(500), nullable=True)
+    galeria_imagenes = db.Column(db.Text, nullable=True)  # JSON string con URLs de imágenes
     imagenes_referencia = db.Column(db.JSON, nullable=True)  # Lista de URLs de imágenes
     
     # Relaciones

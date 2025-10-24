@@ -1,30 +1,45 @@
-// EventLink - JavaScript principal
+// EventLink - JavaScript principal optimizado
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar tooltips de Bootstrap
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
+// ✅ Cargar componentes Bootstrap solo cuando estén disponibles
+function initBootstrapComponents() {
+    // Solo inicializar si Bootstrap está disponible
+    if (typeof bootstrap === 'undefined') {
+        console.warn('⚠️ Bootstrap no disponible, algunos componentes no se inicializarán');
+        return;
+    }
+
+    // Inicializar tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    if (tooltipTriggerList.length > 0) {
+        [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+    }
+
+    // Inicializar popovers
+    const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+    if (popoverTriggerList.length > 0) {
+        [...popoverTriggerList].map(el => new bootstrap.Popover(el));
+    }
+}
+
+// Auto-hide alerts después de 5 segundos
+function initAlerts() {
+    const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            if (typeof bootstrap !== 'undefined') {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            } else {
+                alert.style.display = 'none';
+            }
+        }, 5000);
     });
+}
 
-    // Inicializar popovers de Bootstrap
-    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
-        return new bootstrap.Popover(popoverTriggerEl);
-    });
-
-    // Auto-hide alerts después de 5 segundos
-    setTimeout(function() {
-        var alerts = document.querySelectorAll('.alert');
-        alerts.forEach(function(alert) {
-            var bsAlert = new bootstrap.Alert(alert);
-            bsAlert.close();
-        });
-    }, 5000);
-
-    // Validación de formularios
-    var forms = document.querySelectorAll('.needs-validation');
-    Array.prototype.slice.call(forms).forEach(function(form) {
+// Validación de formularios
+function initFormValidation() {
+    const forms = document.querySelectorAll('.needs-validation');
+    [...forms].forEach(form => {
         form.addEventListener('submit', function(event) {
             if (!form.checkValidity()) {
                 event.preventDefault();
@@ -33,36 +48,74 @@ document.addEventListener('DOMContentLoaded', function() {
             form.classList.add('was-validated');
         }, false);
     });
+}
 
-    // Confirmación de acciones destructivas
-    var deleteButtons = document.querySelectorAll('[data-confirm]');
-    deleteButtons.forEach(function(button) {
+// Confirmación de acciones destructivas
+function initDeleteConfirmations() {
+    const deleteButtons = document.querySelectorAll('[data-confirm]');
+    deleteButtons.forEach(button => {
         button.addEventListener('click', function(e) {
-            var message = this.getAttribute('data-confirm');
+            const message = this.getAttribute('data-confirm');
             if (!confirm(message)) {
                 e.preventDefault();
             }
         });
     });
+}
 
-    // Animación de entrada para cards
-    var cards = document.querySelectorAll('.card');
-    var observer = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('fade-in-up');
+// Animación de entrada para cards (con Intersection Observer)
+function initCardAnimations() {
+    const cards = document.querySelectorAll('.card');
+    
+    if ('IntersectionObserver' in window && cards.length > 0) {
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in-up');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { rootMargin: '50px' });
+
+        cards.forEach(card => observer.observe(card));
+    }
+}
+
+// ✅ Inicialización principal
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 EventLink JS inicializado');
+    
+    // Inicializar funcionalidades básicas
+    initFormValidation();
+    initDeleteConfirmations();
+    initCardAnimations();
+    initAlerts();
+    
+    // Esperar a que Bootstrap esté disponible (si se carga con defer)
+    if (typeof bootstrap === 'undefined') {
+        // Esperar hasta 3 segundos
+        let attempts = 0;
+        const checkBootstrap = setInterval(() => {
+            attempts++;
+            if (typeof bootstrap !== 'undefined') {
+                console.log('✅ Bootstrap cargado, inicializando componentes');
+                clearInterval(checkBootstrap);
+                initBootstrapComponents();
+            } else if (attempts >= 30) {
+                clearInterval(checkBootstrap);
+                console.warn('⚠️ Bootstrap no cargado después de 3s');
             }
-        });
-    });
-
-    cards.forEach(function(card) {
-        observer.observe(card);
-    });
+        }, 100);
+    } else {
+        initBootstrapComponents();
+    }
 });
 
-// Funciones utilitarias
+// ========== FUNCIONES UTILITARIAS ==========
+
 function showLoading(element) {
-    element.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div>';
+    const spinner = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div>';
+    element.innerHTML = spinner;
 }
 
 function hideLoading(element, originalContent) {
@@ -70,14 +123,14 @@ function hideLoading(element, originalContent) {
 }
 
 function formatCurrency(amount) {
-    return new Intl.NumberFormat('es-ES', {
+    return new Intl.NumberFormat('es-CO', {
         style: 'currency',
-        currency: 'USD'
+        currency: 'COP'
     }).format(amount);
 }
 
 function formatDate(dateString) {
-    return new Date(dateString).toLocaleDateString('es-ES', {
+    return new Date(dateString).toLocaleDateString('es-CO', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
@@ -85,7 +138,7 @@ function formatDate(dateString) {
 }
 
 function formatDateTime(dateString) {
-    return new Date(dateString).toLocaleString('es-ES', {
+    return new Date(dateString).toLocaleString('es-CO', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
@@ -94,129 +147,168 @@ function formatDateTime(dateString) {
     });
 }
 
-// Funciones para búsqueda
+// ========== BÚSQUEDA Y FILTROS ==========
+
 function searchServices() {
-    var form = document.getElementById('searchForm');
-    var formData = new FormData(form);
-    var params = new URLSearchParams();
+    const form = document.getElementById('searchForm');
+    if (!form) return;
     
-    for (var pair of formData.entries()) {
-        if (pair[1]) {
-            params.append(pair[0], pair[1]);
-        }
+    const formData = new FormData(form);
+    const params = new URLSearchParams();
+    
+    for (const [key, value] of formData.entries()) {
+        if (value) params.append(key, value);
     }
     
     window.location.href = '/servicios/buscar?' + params.toString();
 }
 
 function clearFilters() {
-    var form = document.getElementById('searchForm');
+    const form = document.getElementById('searchForm');
+    if (!form) return;
+    
     form.reset();
     window.location.href = '/servicios/buscar';
 }
 
-// Funciones para pagos
-// Función de Stripe removida - solo MercadoPago
-
-function processMercadoPagoPayment(contratacionId) {
-    var form = document.getElementById('mercadopagoForm');
-    var formData = new FormData(form);
+function updatePriceRange() {
+    const minPrice = document.getElementById('precio_min')?.value;
+    const maxPrice = document.getElementById('precio_max')?.value;
+    const priceDisplay = document.getElementById('priceRange');
     
-    fetch('/pagos/mercadopago/' + contratacionId, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            monto: formData.get('monto'),
-            tipo_pago: formData.get('tipo_pago')
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
+    if (!priceDisplay) return;
+    
+    if (minPrice || maxPrice) {
+        let range = minPrice ? `$${minPrice}` : '$0';
+        range += ' - ';
+        range += maxPrice ? `$${maxPrice}` : 'Sin límite';
+        priceDisplay.textContent = range;
+    } else {
+        priceDisplay.textContent = 'Cualquier precio';
+    }
+}
+
+function updateRatingRange() {
+    const minRating = document.getElementById('calificacion_min')?.value;
+    const ratingDisplay = document.getElementById('ratingRange');
+    
+    if (!ratingDisplay) return;
+    
+    if (minRating) {
+        const stars = '★'.repeat(minRating) + '☆'.repeat(5 - minRating);
+        ratingDisplay.innerHTML = `Mínimo: ${stars}`;
+    } else {
+        ratingDisplay.textContent = 'Cualquier calificación';
+    }
+}
+
+// ========== PAGOS ==========
+
+async function processMercadoPagoPayment(contratacionId) {
+    const form = document.getElementById('mercadopagoForm');
+    if (!form) return;
+    
+    const formData = new FormData(form);
+    
+    try {
+        const response = await fetch(`/pagos/mercadopago/${contratacionId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                monto: formData.get('monto'),
+                tipo_pago: formData.get('tipo_pago')
+            })
+        });
+        
+        const data = await response.json();
+        
         if (data.exitoso) {
-            // Redirigir a MercadoPago
             window.location.href = data.url_pago;
         } else {
             showAlert('Error en el pago: ' + data.error, 'danger');
         }
-    })
-    .catch(error => {
+    } catch (error) {
         showAlert('Error al procesar el pago', 'danger');
         console.error('Error:', error);
-    });
+    }
 }
 
-// Funciones para notificaciones
-function markNotificationAsRead(notificationId) {
-    fetch('/notificaciones/' + notificationId + '/marcar-leida', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
+// ========== NOTIFICACIONES ==========
+
+async function markNotificationAsRead(notificationId) {
+    try {
+        const response = await fetch(`/notificaciones/${notificationId}/marcar-leida`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const data = await response.json();
+        
         if (data.exitoso) {
-            var notification = document.getElementById('notification-' + notificationId);
+            const notification = document.getElementById(`notification-${notificationId}`);
             if (notification) {
                 notification.classList.remove('no-leida');
                 notification.classList.add('leida');
             }
         }
-    })
-    .catch(error => {
+    } catch (error) {
         console.error('Error:', error);
-    });
+    }
 }
 
-// Funciones para calificaciones
-function submitRating(contratacionId) {
-    var form = document.getElementById('ratingForm');
-    var formData = new FormData(form);
+// ========== CALIFICACIONES ==========
+
+async function submitRating(contratacionId) {
+    const form = document.getElementById('ratingForm');
+    if (!form) return;
     
-    fetch('/contrataciones/' + contratacionId + '/calificar', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
+    const formData = new FormData(form);
+    
+    try {
+        const response = await fetch(`/contrataciones/${contratacionId}/calificar`, {
+            method: 'POST',
+            body: formData
+        });
+        
         if (response.ok) {
             showAlert('Calificación enviada exitosamente', 'success');
-            setTimeout(function() {
-                window.location.reload();
-            }, 2000);
+            setTimeout(() => window.location.reload(), 2000);
         } else {
             showAlert('Error al enviar la calificación', 'danger');
         }
-    })
-    .catch(error => {
+    } catch (error) {
         showAlert('Error al enviar la calificación', 'danger');
         console.error('Error:', error);
-    });
+    }
 }
 
-// Función para mostrar alertas
-function showAlert(message, type) {
-    var alertContainer = document.getElementById('alertContainer') || createAlertContainer();
+// ========== ALERTAS ==========
+
+function showAlert(message, type = 'info') {
+    const container = document.getElementById('alertContainer') || createAlertContainer();
     
-    var alertDiv = document.createElement('div');
-    alertDiv.className = 'alert alert-' + type + ' alert-dismissible fade show';
-    alertDiv.innerHTML = 
-        '<i class="fas fa-' + getAlertIcon(type) + ' me-2"></i>' +
-        message +
-        '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        <i class="fas fa-${getAlertIcon(type)} me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
     
-    alertContainer.appendChild(alertDiv);
+    container.appendChild(alertDiv);
     
     // Auto-hide después de 5 segundos
-    setTimeout(function() {
-        var bsAlert = new bootstrap.Alert(alertDiv);
-        bsAlert.close();
+    setTimeout(() => {
+        if (typeof bootstrap !== 'undefined') {
+            new bootstrap.Alert(alertDiv).close();
+        } else {
+            alertDiv.remove();
+        }
     }, 5000);
 }
 
 function createAlertContainer() {
-    var container = document.createElement('div');
+    const container = document.createElement('div');
     container.id = 'alertContainer';
     container.className = 'position-fixed top-0 end-0 p-3';
     container.style.zIndex = '9999';
@@ -225,84 +317,50 @@ function createAlertContainer() {
 }
 
 function getAlertIcon(type) {
-    var icons = {
-        'success': 'check-circle',
-        'danger': 'exclamation-triangle',
-        'warning': 'exclamation-triangle',
-        'info': 'info-circle'
+    const icons = {
+        success: 'check-circle',
+        danger: 'exclamation-triangle',
+        warning: 'exclamation-triangle',
+        info: 'info-circle'
     };
     return icons[type] || 'info-circle';
 }
 
-// Funciones para filtros dinámicos
-function updatePriceRange() {
-    var minPrice = document.getElementById('precio_min').value;
-    var maxPrice = document.getElementById('precio_max').value;
-    var priceDisplay = document.getElementById('priceRange');
-    
-    if (minPrice || maxPrice) {
-        var range = '';
-        if (minPrice) range += '$' + minPrice;
-        range += ' - ';
-        if (maxPrice) range += '$' + maxPrice;
-        else range += 'Sin límite';
-        priceDisplay.textContent = range;
-    } else {
-        priceDisplay.textContent = 'Cualquier precio';
-    }
-}
+// ========== PREVIEW DE IMÁGENES ==========
 
-function updateRatingRange() {
-    var minRating = document.getElementById('calificacion_min').value;
-    var ratingDisplay = document.getElementById('ratingRange');
-    
-    if (minRating) {
-        ratingDisplay.innerHTML = 'Mínimo: ' + '★'.repeat(minRating) + '☆'.repeat(5 - minRating);
-    } else {
-        ratingDisplay.textContent = 'Cualquier calificación';
-    }
-}
-
-// Funciones para mapas (si se implementan)
-function initMap() {
-    // Implementación futura para mapas
-    console.log('Mapa inicializado');
-}
-
-// Funciones para carga de archivos
 function previewImage(input) {
-    if (input.files && input.files[0]) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            var preview = document.getElementById('imagePreview');
-            if (preview) {
-                preview.src = e.target.result;
-                preview.style.display = 'block';
-            }
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
+    if (!input.files || !input.files[0]) return;
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const preview = document.getElementById('imagePreview');
+        if (preview) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        }
+    };
+    reader.readAsDataURL(input.files[0]);
 }
 
-// Funciones para validación en tiempo real
+// ========== VALIDACIONES ==========
+
 function validateEmail(email) {
-    var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 function validatePhone(phone) {
-    var re = /^[\+]?[1-9][\d]{0,15}$/;
-    return re.test(phone.replace(/\s/g, ''));
+    return /^[\+]?[1-9][\d]{0,15}$/.test(phone.replace(/\s/g, ''));
 }
 
 function validatePassword(password) {
     return password.length >= 6;
 }
 
-// Event listeners para validación en tiempo real
-document.addEventListener('DOMContentLoaded', function() {
-    var emailInputs = document.querySelectorAll('input[type="email"]');
-    emailInputs.forEach(function(input) {
+// ========== VALIDACIÓN EN TIEMPO REAL ==========
+
+function initRealtimeValidation() {
+    // Email
+    document.querySelectorAll('input[type="email"]').forEach(input => {
         input.addEventListener('blur', function() {
             if (this.value && !validateEmail(this.value)) {
                 this.classList.add('is-invalid');
@@ -312,8 +370,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    var phoneInputs = document.querySelectorAll('input[type="tel"]');
-    phoneInputs.forEach(function(input) {
+    // Teléfono
+    document.querySelectorAll('input[type="tel"]').forEach(input => {
         input.addEventListener('blur', function() {
             if (this.value && !validatePhone(this.value)) {
                 this.classList.add('is-invalid');
@@ -323,8 +381,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    var passwordInputs = document.querySelectorAll('input[type="password"]');
-    passwordInputs.forEach(function(input) {
+    // Password
+    document.querySelectorAll('input[type="password"]').forEach(input => {
         input.addEventListener('blur', function() {
             if (this.value && !validatePassword(this.value)) {
                 this.classList.add('is-invalid');
@@ -333,11 +391,23 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-});
+}
 
+// Inicializar validaciones en tiempo real
+document.addEventListener('DOMContentLoaded', initRealtimeValidation);
 
-
-
-
-
-
+// Exportar funciones globales para uso desde HTML inline
+window.EventLink = {
+    searchServices,
+    clearFilters,
+    updatePriceRange,
+    updateRatingRange,
+    processMercadoPagoPayment,
+    markNotificationAsRead,
+    submitRating,
+    showAlert,
+    previewImage,
+    formatCurrency,
+    formatDate,
+    formatDateTime
+};

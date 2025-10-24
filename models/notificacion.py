@@ -33,6 +33,7 @@ class Notificacion(db.Model):
     
     # Relaciones
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    evento_id = db.Column(db.Integer, db.ForeignKey('eventos.id'), nullable=True)
     servicio_id = db.Column(db.Integer, db.ForeignKey('servicios.id'), nullable=True)
     contratacion_id = db.Column(db.Integer, db.ForeignKey('contrataciones.id'), nullable=True)
     pago_id = db.Column(db.Integer, db.ForeignKey('pagos.id'), nullable=True)
@@ -40,6 +41,7 @@ class Notificacion(db.Model):
     # Campos de auditoría
     fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
     fecha_lectura = db.Column(db.DateTime, nullable=True)
+    datos_adicionales = db.Column(db.JSON, nullable=True)
     
     # Relaciones
     usuario = db.relationship('Usuario', backref=db.backref('notificaciones', lazy=True))

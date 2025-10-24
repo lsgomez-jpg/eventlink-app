@@ -46,7 +46,7 @@
                                     {% endif %}
                                     
                                     <div class="d-flex justify-content-between">
-                                        <a href="{{ url_for('pago.detalle_pago', pago_id=pago.id) }}" class="btn btn-outline-primary btn-sm">
+                                        <a href="{{ url_for('pagos.detalle_pago', pago_id=pago.id) }}" class="btn btn-outline-primary btn-sm">
                                             <i class="fas fa-eye"></i> Ver Detalle
                                         </a>
                                         {% if pago.id_transaccion %}

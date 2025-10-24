@@ -1,3 +1,5 @@
+# EventLink - .gitignore
+
 # Python
 __pycache__/
 *.py[cod]
@@ -19,12 +21,63 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
-# Flask
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+
+# Flask stuff:
 instance/
 .webassets-cache
 
-# Environment variables
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
 .env
 .venv
 env/
@@ -33,7 +86,22 @@ ENV/
 env.bak/
 venv.bak/
 
-# IDE
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# IDEs
 .vscode/
 .idea/
 *.swp
@@ -49,18 +117,37 @@ venv.bak/
 ehthumbs.db
 Thumbs.db
 
-# Database
+# EventLink specific
+uploads/
 *.db
 *.sqlite
 *.sqlite3
 
+# Build files
+dist/
+build/
+*.min.js
+*.min.css
+
+# Node.js (if used)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
 # Logs
 *.log
-
-# Uploads
-uploads/
-static/uploads/
+logs/
 
 # Temporary files
 *.tmp
 *.temp
+*.bak
+*.swp
+*.swo
+*~
+
+# Reports
+*.json
+!package.json
+!package-lock.json

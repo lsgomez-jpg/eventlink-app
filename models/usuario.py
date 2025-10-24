@@ -21,7 +21,7 @@ class Usuario(db.Model):
     correo = db.Column(db.String(120), unique=True, nullable=False)
     telefono = db.Column(db.String(20), nullable=True)
     contraseña = db.Column(db.String(200), nullable=False)
-    rol = db.Column(Enum(RolUsuario, name="rolusuario", create_type=False), nullable=False)  
+    rol = db.Column(Enum(RolUsuario, name="rolusuario", create_type=True), nullable=False)  
     activo = db.Column(db.Boolean, default=True)
     
     # Información adicional del perfil
@@ -100,8 +100,8 @@ class Usuario(db.Model):
         if not self.es_proveedor():
             return 0
         
-        from models.servicio import Servicio
-        return Servicio.query.filter_by(proveedor_id=self.id, estado='disponible').count()
+        from models.servicio import Servicio, EstadoServicio
+        return Servicio.query.filter_by(proveedor_id=self.id, estado=EstadoServicio.disponible).count()
     
     def obtener_numero_eventos(self):
         """Obtiene el número de eventos del organizador"""
@@ -116,7 +116,7 @@ class Usuario(db.Model):
         from models.notificacion import Notificacion, EstadoNotificacion
         return Notificacion.query.filter_by(
             usuario_id=self.id, 
-            estado=EstadoNotificacion.NO_LEIDA
+            estado=EstadoNotificacion.no_leida
         ).count()
     
     def desactivar_cuenta(self):

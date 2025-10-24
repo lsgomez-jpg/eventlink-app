@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}Historial de Pagos - EventLink{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="figma-brand" style="color: var(--figma-lila);"><i class="fas fa-history"></i> Historial de Pagos</h2>
+                <a href="{{ url_for('index') }}" class="btn-pago-outline">
+                    <i class="fas fa-arrow-left"></i> Volver al Inicio
+                </a>
+            </div>
+
+            <!-- Filtros -->
+            <div class="pago-filtros">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="filtro_estado" class="form-label">Filtrar por Estado</label>
+                            <select class="form-select" id="filtro_estado">
+                                <option value="">Todos los estados</option>
+                                <option value="aprobado">Aprobado</option>
+                                <option value="pendiente">Pendiente</option>
+                                <option value="rechazado">Rechazado</option>
+                                <option value="cancelado">Cancelado</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filtro_fecha" class="form-label">Filtrar por Fecha</label>
+                            <input type="date" class="form-control" id="filtro_fecha">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="buscar" class="form-label">Buscar</label>
+                            <input type="text" class="form-control" id="buscar" placeholder="ID de pago, servicio...">
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn-pago w-100" onclick="aplicarFiltros()">
+                                <i class="fas fa-search"></i> Filtrar
+                            </button>
+                        </div>
+                    </div>
+            </div>
+
+            <!-- Lista de pagos -->
+            {% if pagos %}
+                <div class="row" id="lista_pagos">
+                    {% for pago in pagos %}
+                    <div class="col-md-6 col-lg-4 mb-4 pago-item" 
+                         data-estado="{{ pago.estado.value }}" 
+                         data-fecha="{{ pago.fecha_creacion.strftime('%Y-%m-%d') }}"
+                         data-busqueda="{{ pago.id }} {{ pago.contratacion.servicio.nombre if pago.contratacion else '' }}">
+                        <div class="pago-card h-100">
+                            <div class="pago-header d-flex justify-content-between align-items-center">
+                                <h6 class="pago-title mb-0">Pago #{{ pago.id }}</h6>
+                                <div class="d-flex flex-column align-items-end">
+                                    <span class="pago-badge {{ pago.estado.value }}">
+                                        {% if pago.estado.value == 'aprobado' %}Aprobado
+                                        {% elif pago.estado.value == 'pendiente' %}Pendiente
+                                        {% elif pago.estado.value == 'rechazado' %}Rechazado
+                                        {% else %}{{ pago.estado.value|title }}{% endif %}
+                                    </span>
+                                    {% if pago.organizador_id == session.user_id %}
+                                        <small class="text-success mt-1"><i class="fas fa-arrow-up"></i> Pagaste</small>
+                                    {% else %}
+                                        <small class="text-info mt-1"><i class="fas fa-arrow-down"></i> Recibiste</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="pago-info">
+                                <div class="pago-info-item">
+                                    <p class="pago-info-label">Monto:</p>
+                                    <p class="pago-info-value">${{ "%.2f"|format(pago.monto) }}</p>
+                                </div>
+                                <div class="pago-info-item">
+                                    <p class="pago-info-label">Método:</p>
+                                    <p class="pago-info-value">{{ pago.metodo_pago.value|title }}</p>
+                                </div>
+                                <div class="pago-info-item">
+                                    <p class="pago-info-label">Fecha:</p>
+                                    <p class="pago-info-value">{{ pago.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</p>
+                                </div>
+                                {% if pago.contratacion %}
+                                <div class="pago-info-item">
+                                    <p class="pago-info-label">Servicio:</p>
+                                    <p class="pago-info-value">{{ pago.contratacion.servicio.nombre }}</p>
+                                </div>
+                                <div class="pago-info-item">
+                                    <p class="pago-info-label">Evento:</p>
+                                    <p class="pago-info-value">{{ pago.contratacion.evento.titulo }}</p>
+                                </div>
+                                {% endif %}
+                                {% if pago.id_transaccion %}
+                                <div class="pago-info-item">
+                                    <p class="pago-info-label">ID Transacción:</p>
+                                    <p class="pago-info-value"><small class="text-muted">{{ pago.id_transaccion }}</small></p>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="pago-actions">
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <a href="{{ url_for('pagos.detalle_pago', pago_id=pago.id) }}" 
+                                       class="btn-pago btn-sm">
+                                        <i class="fas fa-eye"></i> Ver Detalle
+                                    </a>
+                                    {% if pago.estado.value == 'rechazado' %}
+                                    <a href="{{ url_for('pagos.procesar_pago', contratacion_id=pago.contratacion.id) }}" 
+                                       class="btn btn-warning btn-sm">
+                                        <i class="fas fa-redo"></i> Reintentar
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Estadísticas -->
+                <div class="pago-stats">
+                    <h5 class="figma-brand mb-4"><i class="fas fa-chart-bar"></i> Resumen de Pagos</h5>
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="pago-stat-item">
+                                <div class="pago-stat-number pago-estado-aprobado">{{ pagos|selectattr('estado.value', 'equalto', 'aprobado')|list|length }}</div>
+                                <p class="pago-stat-label">Aprobados</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="pago-stat-item">
+                                <div class="pago-stat-number pago-estado-pendiente">{{ pagos|selectattr('estado.value', 'equalto', 'pendiente')|list|length }}</div>
+                                <p class="pago-stat-label">Pendientes</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="pago-stat-item">
+                                <div class="pago-stat-number pago-estado-rechazado">{{ pagos|selectattr('estado.value', 'equalto', 'rechazado')|list|length }}</div>
+                                <p class="pago-stat-label">Rechazados</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="pago-stat-item">
+                                <div class="pago-stat-number" style="color: var(--figma-blue);">${{ "%.2f"|format(pagos|sum(attribute='monto')) }}</div>
+                                <p class="pago-stat-label">Total Pagado</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <!-- Sin pagos -->
+                <div class="text-center py-5">
+                    <i class="fas fa-credit-card fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">No tienes pagos registrados</h4>
+                    <p class="text-muted">Cuando realices tu primer pago, aparecerá aquí.</p>
+                    <a href="{{ url_for('index') }}" class="btn-pago">
+                        <i class="fas fa-home"></i> Ir al Inicio
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function aplicarFiltros() {
+    const filtroEstado = document.getElementById('filtro_estado').value;
+    const filtroFecha = document.getElementById('filtro_fecha').value;
+    const buscar = document.getElementById('buscar').value.toLowerCase();
+    
+    const pagos = document.querySelectorAll('.pago-item');
+    
+    pagos.forEach(pago => {
+        let mostrar = true;
+        
+        // Filtrar por estado
+        if (filtroEstado && pago.dataset.estado !== filtroEstado) {
+            mostrar = false;
+        }
+        
+        // Filtrar por fecha
+        if (filtroFecha && pago.dataset.fecha !== filtroFecha) {
+            mostrar = false;
+        }
+        
+        // Filtrar por búsqueda
+        if (buscar && !pago.dataset.busqueda.toLowerCase().includes(buscar)) {
+            mostrar = false;
+        }
+        
+        pago.style.display = mostrar ? 'block' : 'none';
+    });
+}
+
+// Aplicar filtros automáticamente al escribir
+document.getElementById('buscar').addEventListener('input', aplicarFiltros);
+document.getElementById('filtro_estado').addEventListener('change', aplicarFiltros);
+document.getElementById('filtro_fecha').addEventListener('change', aplicarFiltros);
+</script>
+{% endblock %}

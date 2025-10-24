@@ -3,14 +3,22 @@ import os
 from flask import Flask, render_template
 from flask_migrate import Migrate
 from flask_mail import Mail
-from config import config
+from config import get_config
 from database import db
 from dotenv import load_dotenv
+
+# cargar variables de entorno desde .env
+load_dotenv(override=True)
+
+# configurar token de MercadoPago si no está en .env
+if not os.environ.get('MERCADOPAGO_ACCESS_TOKEN'):
+    os.environ['MERCADOPAGO_ACCESS_TOKEN'] = 'TEST-4157849620035829-091318-914e52c84a25ee69d717188c213520c2-812982447'
+
+print(f"Token cargado: {os.environ.get('MERCADOPAGO_ACCESS_TOKEN', 'NO ENCONTRADO')}")
 
 # inicializar extensiones
 migrate = Migrate()
 mail = Mail()
-load_dotenv()
 
 def create_app(config_name=None):
     # factory function para crear la aplicacion flask
@@ -18,7 +26,7 @@ def create_app(config_name=None):
     
     # configuracion
     config_name = config_name or os.environ.get('FLASK_ENV', 'development')
-    app.config.from_object(config[config_name])
+    app.config.from_object(get_config(config_name))
     
     # inicializar extensiones
     db.init_app(app)
@@ -129,7 +137,7 @@ if __name__ == "__main__":
     with app.app_context():
         from database import db
         db.create_all()
-        print("✅ Base de datos inicializada")
+        print("Base de datos inicializada")
     
     # ejecutar la aplicacion
     app.run(

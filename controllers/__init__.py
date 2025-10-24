@@ -1,8 +1,3 @@
-# controllers/__init__.py
-"""
-Módulo de controladores de EventLink
-Implementa el patrón MVC y principios SOLID
-"""
 
 from .usuario_controller import UsuarioController
 from .evento_controller import EventoController

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Pago Exitoso - EventLink{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card text-center">
+                <div class="card-body">
+                    <!-- Icono según estado -->
+                    <div class="mb-4">
+                        {% if pago.estado.value == 'aprobado' %}
+                            <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                        {% elif pago.estado.value == 'pendiente' %}
+                            <i class="fas fa-clock" style="font-size: 4rem; color: var(--figma-lila);"></i>
+                        {% elif pago.estado.value == 'rechazado' %}
+                            <i class="fas fa-times-circle text-danger" style="font-size: 4rem;"></i>
+                        {% else %}
+                            <i class="fas fa-info-circle text-info" style="font-size: 4rem;"></i>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Título -->
+                    <h2 class="card-title mb-3" style="color: var(--figma-lila);">
+                        {% if pago.estado.value == 'aprobado' %}
+                            ¡Pago Aprobado!
+                        {% elif pago.estado.value == 'pendiente' %}
+                            Pago Pendiente
+                        {% elif pago.estado.value == 'rechazado' %}
+                            Pago Rechazado
+                        {% else %}
+                            Detalle del Pago
+                        {% endif %}
+                    </h2>
+                    
+                    <!-- Información del pago -->
+                    <div class="alert 
+                        {% if pago.estado.value == 'aprobado' %}alert-success
+                        {% elif pago.estado.value == 'pendiente' %}alert-warning
+                        {% elif pago.estado.value == 'rechazado' %}alert-danger
+                        {% else %}alert-info{% endif %}">
+                        <h5 class="mb-2">Detalles del Pago</h5>
+                        <p class="mb-1"><strong>ID del Pago:</strong> {{ pago.id }}</p>
+                        <p class="mb-1"><strong>Monto:</strong> ${{ "%.2f"|format(pago.monto) }}</p>
+                        <p class="mb-1"><strong>Estado:</strong> 
+                            {% if pago.estado.value == 'aprobado' %}
+                                <span class="badge bg-success">Aprobado</span>
+                            {% elif pago.estado.value == 'pendiente' %}
+                                <span class="pago-badge pendiente">Pendiente</span>
+                            {% elif pago.estado.value == 'rechazado' %}
+                                <span class="badge bg-danger">Rechazado</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ pago.estado.value|title }}</span>
+                            {% endif %}
+                        </p>
+                        {% if pago.id_transaccion %}
+                        <p class="mb-0"><strong>ID de Transacción:</strong> {{ pago.id_transaccion }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Información de la contratación -->
+                    {% if pago.contratacion %}
+                    <div class="alert alert-info">
+                        <h6 class="mb-2">Servicio Contratado</h6>
+                        <p class="mb-1"><strong>Servicio:</strong> {{ pago.contratacion.servicio.nombre }}</p>
+                        <p class="mb-1"><strong>Evento:</strong> {{ pago.contratacion.evento.titulo }}</p>
+                        <p class="mb-0"><strong>Fecha del Evento:</strong> {{ pago.contratacion.fecha_evento.strftime('%d/%m/%Y') }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Mensaje según el estado -->
+                    {% if pago.estado.value == 'aprobado' %}
+                        <div class="alert alert-success">
+                            <h6><i class="fas fa-thumbs-up"></i> ¡Excelente!</h6>
+                            <p class="mb-0">Tu pago ha sido aprobado exitosamente. Recibirás un email de confirmación pronto.</p>
+                        </div>
+                    {% elif pago.estado.value == 'pendiente' %}
+                        <div class="alert alert-warning">
+                            <h6><i class="fas fa-clock"></i> Pago Pendiente</h6>
+                            <p class="mb-0">Tu pago está siendo procesado. Te notificaremos cuando sea confirmado.</p>
+                        </div>
+                    {% elif pago.estado.value == 'rechazado' %}
+                        <div class="alert alert-danger">
+                            <h6><i class="fas fa-exclamation-triangle"></i> Pago Rechazado</h6>
+                            <p class="mb-0">Tu pago fue rechazado. Por favor, intenta con otra tarjeta o método de pago.</p>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Botones de acción -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <a href="{{ url_for('pagos.historial_pagos') }}" class="btn-pago">
+                            <i class="fas fa-history"></i> Ver Historial
+                        </a>
+                        <a href="{{ url_for('index') }}" class="btn-pago-outline">
+                            <i class="fas fa-home"></i> Ir al Inicio
+                        </a>
+                        {% if pago.estado.value == 'rechazado' and pago.contratacion %}
+                        <a href="{{ url_for('pagos.procesar_pago', contratacion_id=pago.contratacion.id) }}" class="btn btn-warning">
+                            <i class="fas fa-redo"></i> Reintentar Pago
+                        </a>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Información adicional -->
+                    <div class="mt-4">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i>
+                            Si tienes alguna pregunta, contacta a nuestro equipo de soporte.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -16,10 +16,13 @@ def agregar_al_carrito(servicio_id):
     # agrega un servicio al carrito
     return CarritoController.agregar_al_carrito(servicio_id)
 
-@carrito_bp.route('/editar/<int:item_id>')
+@carrito_bp.route('/editar/<int:item_id>', methods=['GET', 'POST'])
 def editar_item(item_id):
-    # muestra el formulario para editar un item del carrito
-    return CarritoController.editar_item(item_id)
+    # muestra el formulario para editar un item del carrito o procesa la actualización
+    if request.method == 'GET':
+        return CarritoController.editar_item(item_id)
+    else:  # POST
+        return CarritoController.actualizar_item(item_id)
 
 @carrito_bp.route('/actualizar/<int:item_id>', methods=['POST'])
 def actualizar_item(item_id):
@@ -70,3 +73,18 @@ def pago_pendiente():
 def pagar_directo_mercadopago():
     # redirige directamente a mercadopago sin formularios
     return CarritoController.pagar_directo_mercadopago()
+
+@carrito_bp.route('/checkout-api/<int:item_id>')
+def checkout_api(item_id):
+    # muestra el formulario de pago personalizado con checkout api
+    return CarritoController.checkout_api(item_id)
+
+@carrito_bp.route('/procesar-pago-api/<int:item_id>', methods=['POST'])
+def procesar_pago_api(item_id):
+    # procesa el pago usando checkout api (recibe token de tarjeta)
+    return CarritoController.procesar_pago_api(item_id)
+
+@carrito_bp.route('/mercadopago-public-key')
+def mercadopago_public_key():
+    # devuelve la public key de mercadopago para el frontend
+    return CarritoController.mercadopago_public_key()

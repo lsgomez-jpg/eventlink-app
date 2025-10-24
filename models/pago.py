@@ -35,23 +35,26 @@ class Pago(db.Model):
     estado = db.Column(db.Enum(EstadoPago), default=EstadoPago.pendiente, nullable=False)
     
     # Información del pagador
-    nombre_titular = db.Column(db.String(100), nullable=False)
-    email_pagador = db.Column(db.String(100), nullable=False)
-    telefono_pagador = db.Column(db.String(20))
-    documento_pagador = db.Column(db.String(20))
+    nombre_titular = db.Column(db.String(200), nullable=True)
+    email_pagador = db.Column(db.String(200), nullable=True)
+    telefono_pagador = db.Column(db.String(20), nullable=True)
+    documento_pagador = db.Column(db.String(20), nullable=True)
     
     # Relaciones
-    contratacion_id = db.Column(db.Integer, db.ForeignKey('contrataciones.id'), nullable=True)
+    contratacion_id = db.Column(db.Integer, db.ForeignKey('contrataciones.id'), nullable=False)
     organizador_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
     
     # Datos de la transacción
-    id_transaccion = db.Column(db.String(100))  # ID de MercadoPago, Stripe, etc.
-    _datos_adicionales = db.Column("datos_adicionales", db.Text)  # Guardamos JSON como string
+    id_transaccion = db.Column(db.String(100), nullable=True)  # ID de MercadoPago, Stripe, etc.
+    referencia_pago = db.Column(db.String(100), nullable=True)
+    codigo_autorizacion = db.Column(db.String(50), nullable=True)
+    datos_adicionales = db.Column(db.JSON, nullable=True)
     
     # Fechas
     fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
-    fecha_aprobacion = db.Column(db.DateTime)
     fecha_actualizacion = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    fecha_pago = db.Column(db.DateTime, nullable=True)
+    fecha_aprobacion = db.Column(db.DateTime, nullable=True)
     
     # Relaciones
     contratacion = db.relationship('Contratacion', backref='pagos')

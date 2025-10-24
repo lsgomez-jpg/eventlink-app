@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EventLink - Conectando Organizadores y Proveedores{% endblock %}</title>
+    
+    <!-- CSS Crítico Inline - 0 llamadas adicionales -->
+    <style>
+        /* Bootstrap CSS crítico inline */
+        .container{max-width:1140px;margin:0 auto;padding:0 15px}
+        .row{display:flex;flex-wrap:wrap;margin:0 -15px}
+        .col-lg-8{flex:0 0 66.666667%;max-width:66.666667%}
+        .text-center{text-align:center}
+        .btn{display:inline-block;padding:12px 24px;border:1px solid transparent;border-radius:8px;text-decoration:none;font-weight:600;transition:all 0.2s ease}
+        .btn-primary{background-color:#0066CC;color:#fff;border-color:#0066CC}
+        .btn-primary:hover{background-color:#004499;border-color:#004499;transform:translateY(-1px)}
+        .btn-outline-primary{border:1px solid #0066CC;color:#0066CC;background:transparent}
+        .btn-outline-primary:hover{background:#0066CC;color:#fff}
+        .btn-lg{padding:16px 32px;font-size:16px}
+        .navbar{display:flex;align-items:center;padding:1rem 0;background:#fff;border-bottom:1px solid #CCCCCC}
+        .navbar-brand{font-weight:600;font-size:1.5rem;color:#0066CC;text-decoration:none;display:flex;align-items:center;gap:0.5rem}
+        .navbar-brand:hover{color:#004499}
+        .navbar-brand img{height:32px;width:auto}
+        .navbar-nav{display:flex;list-style:none;margin:0;padding:0;gap:1rem}
+        .nav-link{color:#1A1A1A;padding:0.5rem 1rem;border-radius:8px;text-decoration:none;transition:all 0.2s ease}
+        .nav-link:hover{color:#0066CC;background-color:#F0F8FF}
+        .hero-section{padding:80px 0;background:linear-gradient(135deg,#f8f9fa 0%,#e9ecef 100%)}
+        .hero-title{font-size:3rem;font-weight:700;color:#1A1A1A;margin-bottom:1.5rem}
+        .hero-description{font-size:1.2rem;color:#666666;margin-bottom:2rem}
+        .hero-buttons{display:flex;gap:1rem;align-items:center;margin-bottom:3rem;flex-wrap:wrap}
+        .carousel-section{margin:0;padding:0}
+        .carousel-image{height:500px;background-size:cover;background-position:center;background-repeat:no-repeat;position:relative;width:100%}
+        .carousel-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background-color:rgba(0,0,0,0.5);display:flex;align-items:center}
+        .carousel-title{color:white;font-weight:700;font-size:2.5rem;text-shadow:2px 2px 4px rgba(0,0,0,0.7);margin-bottom:1rem}
+        .carousel-description{color:white;font-size:1.2rem;text-shadow:1px 1px 2px rgba(0,0,0,0.7);margin-bottom:2rem}
+        .service-card{background:white;border-radius:12px;box-shadow:0 4px 8px rgba(0,0,0,0.1);overflow:hidden;transition:transform 0.3s ease,box-shadow 0.3s ease;height:100%}
+        .service-card:hover{transform:translateY(-5px);box-shadow:0 8px 16px rgba(0,0,0,0.15)}
+        .service-image{position:relative;overflow:hidden;height:200px}
+        .service-image img{width:100%;height:100%;object-fit:cover;transition:transform 0.3s ease}
+        .service-card:hover .service-image img{transform:scale(1.05)}
+        .service-content{padding:1.5rem}
+        .service-name{font-size:1.2rem;font-weight:600;color:#1A1A1A;margin-bottom:0.5rem}
+        .service-description{color:#666666;font-size:0.9rem;line-height:1.5}
+        .footer{background-color:#F5F5F5;border-top:1px solid #CCCCCC;padding:2rem 0;margin-top:3rem}
+        .footer h5{color:#1A1A1A;font-weight:600}
+        .footer p{color:#666666;margin-bottom:0}
+        .alert{padding:1rem;border-radius:8px;margin-bottom:1rem;border-left:4px solid}
+        .alert-success{border-left-color:#00A699;background-color:rgba(25,135,84,0.1)}
+        .alert-danger{border-left-color:#DC3545;background-color:rgba(220,53,69,0.1)}
+        .alert-info{border-left-color:#0066CC;background-color:rgba(13,202,240,0.1)}
+        .btn-close{background:none;border:none;font-size:1.5rem;cursor:pointer;float:right}
+        .fade{transition:opacity 0.15s linear}
+        .show{opacity:1}
+        .collapse:not(.show){display:none}
+        .navbar-toggler{background:none;border:1px solid transparent;border-radius:4px;padding:0.25rem 0.75rem}
+        .navbar-toggler-icon{display:inline-block;width:1.5em;height:1.5em;vertical-align:middle;background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2833, 37, 41, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");background-repeat:no-repeat;background-position:center;background-size:100%}
+        @media (max-width:768px){.hero-section{padding:2rem 0}.btn-lg{padding:10px 20px;font-size:1rem}.btn-primary,.hero-btn{width:100%;min-width:unset}}
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar EventLink Style -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" alt="EventLink" height="32">
+                EventLink
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('servicio.catalogo_servicios') }}">Servicios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('evento.listar_eventos') }}">Eventos</a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    {% if session.user_id %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                👤 {{ session.user_nombre }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('usuario.perfil') }}">Mi Perfil</a></li>
+                                {% if session.user_rol == 'organizador' %}
+                                    <li><a class="dropdown-item" href="{{ url_for('evento.crear_evento') }}">Crear Evento</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('evento.listar_eventos') }}">Mis Eventos</a></li>
+                                {% elif session.user_rol == 'proveedor' %}
+                                    <li><a class="dropdown-item" href="{{ url_for('servicio.crear_servicio') }}">Crear Servicio</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('servicio.listar_servicios') }}">Mis Servicios</a></li>
+                                {% endif %}
+                                <li><a class="dropdown-item" href="{{ url_for('carrito.ver_carrito') }}">Carrito</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('contratacion.listar_contrataciones') }}">Contrataciones</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('usuario.logout') }}">Cerrar Sesión</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('usuario.login') }}">Iniciar Sesión</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary btn-sm" href="{{ url_for('usuario.registro') }}">Registrarse</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mensajes flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mt-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Contenido principal -->
+    <main class="py-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer EventLink Style -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>EventLink</h5>
+                    <p>Conectando organizadores y proveedores de servicios para eventos únicos.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>&copy; 2024 EventLink. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Bundle Inline - 0 llamadas adicionales -->
+    <script>
+        // Bootstrap JavaScript crítico inline
+        (function(){
+            'use strict';
+            var collapseElements = document.querySelectorAll('[data-bs-toggle="collapse"]');
+            collapseElements.forEach(function(element) {
+                element.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var target = document.querySelector(this.getAttribute('data-bs-target'));
+                    if (target) {
+                        target.classList.toggle('show');
+                    }
+                });
+            });
+            
+            // Auto-hide alerts
+            var alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
+            alerts.forEach(function(alert) {
+                setTimeout(function() {
+                    alert.style.display = 'none';
+                }, 5000);
+            });
+            
+            // Form validation
+            var forms = document.querySelectorAll('.needs-validation');
+            Array.prototype.slice.call(forms).forEach(function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        })();
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

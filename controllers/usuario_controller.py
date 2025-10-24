@@ -40,11 +40,12 @@ class UsuarioController:
         
         try:
             # Crear nuevo usuario
+            from models.usuario import RolUsuario
             nuevo_usuario = Usuario(
                 nombre=nombre,
                 correo=correo,
                 contraseña=contraseña,
-                rol=rol
+                rol=RolUsuario(rol)
             )
             
             db.session.add(nuevo_usuario)

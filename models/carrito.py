@@ -46,7 +46,7 @@ class CarritoItem(db.Model):
     # Estado del item
     estado = db.Column(Enum(EstadoCarritoItem), default=EstadoCarritoItem.pendiente)
     
-    # CURSOR IA: Tipo de item para diferenciar entre servicios y contrataciones
+    # Tipo de item para diferenciar entre servicios y contrataciones
     tipo_item = db.Column(db.String(20), default='servicio', nullable=False)
     
     # Campos de auditoría
@@ -64,7 +64,7 @@ class CarritoItem(db.Model):
         self.numero_personas = numero_personas
         self.ubicacion = ubicacion
         self.notas_especiales = notas_especiales
-        self.tipo_item = tipo_item  # CURSOR IA: aseguramos el tipo
+        self.tipo_item = tipo_item  # aseguramos el tipo
 
         # Asignar campos opcionales
         for key, value in kwargs.items():
@@ -180,7 +180,7 @@ class CarritoItem(db.Model):
             estado=EstadoCarritoItem.pendiente
         ).all()
 
-        # CURSOR IA: Aseguramos que todos los precios estén calculados
+        # Aseguramos que todos los precios estén calculados
         for item in items:
             item.calcular_precios()
         
@@ -202,3 +202,4 @@ class CarritoItem(db.Model):
     
     def __repr__(self):
         return f"<CarritoItem {self.servicio.nombre if self.servicio else 'N/A'} - {self.precio_total}>"
+

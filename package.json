@@ -1,0 +1,29 @@
+{
+  "name": "eventlink-optimizer",
+  "version": "1.0.0",
+  "description": "Sistema de optimización web para EventLink",
+  "main": "src/build.js",
+  "scripts": {
+    "build": "node src/build.js && node src/optimize-html.js",
+    "build:assets": "node src/build.js",
+    "build:html": "node src/optimize-html.js",
+    "integrate": "node src/integrate.js",
+    "deploy": "npm run build && npm run integrate",
+    "cleanup": "node src/cleanup.js",
+    "analyze": "node src/analyze.js",
+    "cleanup-files": "node src/cleanup-files.js",
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean"
+  },
+  "devDependencies": {
+    "terser": "^5.24.0",
+    "csso": "^5.0.5",
+    "rimraf": "^5.0.5",
+    "fs-extra": "^11.1.1",
+    "sharp": "^0.32.6",
+    "jsdom": "^23.0.1"
+  },
+  "keywords": ["optimization", "web", "performance", "eventlink"],
+  "author": "EventLink Team",
+  "license": "MIT"
+}

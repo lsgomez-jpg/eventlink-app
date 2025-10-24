@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}Pago - EventLink{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card-form {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+    .btn-pagar {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+    }
+    .loading {
+        display: none;
+    }
+    .error-message {
+        display: none;
+        margin-top: 15px;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .error-message.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    .error-message.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-credit-card"></i> Pago con MercadoPago
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Información del servicio -->
+                    <div class="alert alert-info">
+                        <h5 class="mb-2">{{ item.servicio.nombre }}</h5>
+                        <div class="mb-1"><strong>Evento:</strong> {{ item.evento.titulo }}</div>
+                        <div class="mb-1"><strong>Fecha:</strong> {{ item.fecha_evento.strftime('%d/%m/%Y') }}</div>
+                        <div><strong>Total:</strong> ${{ "{:,.0f}".format(item.precio_total) }} COP</div>
+                    </div>
+
+                    <!-- Información del formulario -->
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-credit-card"></i> Formulario de pago con MercadoPago Checkout API</h6>
+                        <small>
+                            <strong>✅ Integración real:</strong> Este formulario usa MercadoPago Checkout API<br>
+                            <strong>📋 Datos del usuario:</strong> Se cargan automáticamente desde tu perfil<br>
+                            <strong>💳 Modo sandbox:</strong> Usa las tarjetas de prueba oficiales
+                        </small>
+                    </div>
+
+                    <!-- Tarjetas de prueba -->
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-info-circle"></i> Tarjetas de prueba oficiales de MercadoPago</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Visa:</strong> 4509 9535 6623 3704<br>
+                                <strong>Fecha:</strong> 11/25 | <strong>CVV:</strong> 123
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Mastercard:</strong> 5031 7557 3453 0604<br>
+                                <strong>Fecha:</strong> 11/25 | <strong>CVV:</strong> 123
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <small class="text-muted">Documento: 12345678 | Solo funcionan en modo sandbox</small>
+                        </div>
+                    </div>
+
+                    <!-- Formulario de pago -->
+                    <form id="form-pago" class="card-form">
+                        <div class="mb-3">
+                            <label for="cardholderName" class="form-label">Nombre del titular</label>
+                            <input type="text" id="cardholderName" class="form-control" 
+                                   value="{{ session.user_nombre or '' }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="cardholderEmail" class="form-label">Email</label>
+                            <input type="email" id="cardholderEmail" class="form-control" 
+                                   value="{{ session.user_correo or '' }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="cardholderPhone" class="form-label">Teléfono</label>
+                            <input type="tel" id="cardholderPhone" class="form-control" 
+                                   value="{{ session.user_telefono or '' }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="cardNumber" class="form-label">Número de tarjeta</label>
+                            <input type="text" id="cardNumber" class="form-control" 
+                                   placeholder="4509 9535 6623 3704" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="expirationDate" class="form-label">Fecha de vencimiento</label>
+                                    <input type="text" id="expirationDate" class="form-control" 
+                                           placeholder="11/25" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="securityCode" class="form-label">CVV</label>
+                                    <input type="text" id="securityCode" class="form-control" 
+                                           placeholder="123" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="installments" class="form-label">Cuotas</label>
+                                    <select id="installments" class="form-control" required>
+                                        <option value="1">1 cuota</option>
+                                        <option value="2">2 cuotas</option>
+                                        <option value="3">3 cuotas</option>
+                                        <option value="6">6 cuotas</option>
+                                        <option value="12">12 cuotas</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="identificationType" class="form-label">Tipo de documento</label>
+                                    <select id="identificationType" class="form-control" required>
+                                        <option value="CC">Cédula de Ciudadanía</option>
+                                        <option value="CE">Cédula de Extranjería</option>
+                                        <option value="PP">Pasaporte</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="identificationNumber" class="form-label">Número de documento</label>
+                            <input type="text" id="identificationNumber" class="form-control" 
+                                   placeholder="12345678" required>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" id="btn-pagar" class="btn btn-success btn-pagar">
+                                <i class="fas fa-credit-card"></i> Pagar ${{ "{:,.0f}".format(item.precio_total) }} COP
+                            </button>
+                        </div>
+
+                        <div class="loading text-center mt-3">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Procesando pago...</span>
+                            </div>
+                            <p class="mt-2">Procesando pago...</p>
+                        </div>
+
+                        <div id="error-message" class="error-message"></div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- ✅ Cargar MercadoPago usando el loader -->
+<script src="{{ url_for('static', filename='js/mercadopago-loader.js') }}"></script>
+
+<script>
+console.log('🚀 Inicializando pago desde carrito...');
+
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        // ✅ Cargar MercadoPago usando el singleton
+        const mp = await window.loadMercadoPago("TEST-f337044d-548b-4395-8b18-ee976a52ea42");
+        console.log('✅ MercadoPago listo');
+
+        // Configurar formulario de tarjeta
+        const cardForm = mp.cardForm({
+            amount: "{{ item.precio_total }}",
+            autoMount: true,
+            form: {
+                id: "form-pago",
+                cardholderName: { id: "cardholderName" },
+                cardholderEmail: { id: "cardholderEmail" },
+                cardNumber: { id: "cardNumber" },
+                expirationDate: { id: "expirationDate" },
+                securityCode: { id: "securityCode" },
+                installments: { id: "installments" },
+                identificationType: { id: "identificationType" },
+                identificationNumber: { id: "identificationNumber" },
+            },
+            callbacks: {
+                onFormMounted: error => {
+                    if (error) {
+                        console.error('Error al montar el formulario:', error);
+                        showError('Error al cargar el formulario de pago');
+                    } else {
+                        console.log('✅ Formulario montado correctamente');
+                    }
+                },
+                onSubmit: event => {
+                    event.preventDefault();
+                    console.log('🔄 Procesando pago...');
+                    processPayment();
+                },
+                onFetching: (resource) => {
+                    console.log('🔄 Obteniendo recurso:', resource);
+                }
+            }
+        });
+
+        function processPayment() {
+            const btnPagar = document.getElementById('btn-pagar');
+            const loading = document.querySelector('.loading');
+            const errorDiv = document.getElementById('error-message');
+            
+            // Mostrar loading
+            btnPagar.disabled = true;
+            loading.style.display = 'block';
+            errorDiv.style.display = 'none';
+
+            try {
+                const cardData = cardForm.getCardFormData();
+                console.log('📋 Datos de la tarjeta obtenidos');
+
+                if (!cardData.token) {
+                    throw new Error('No se pudo generar el token de la tarjeta');
+                }
+
+                const datosPago = {
+                    token: cardData.token,
+                    payment_method_id: cardData.paymentMethodId,
+                    installments: parseInt(cardData.installments),
+                    issuer_id: cardData.issuerId,
+                    email_pagador: document.getElementById("cardholderEmail").value,
+                    nombre_titular: document.getElementById("cardholderName").value,
+                    documento_pagador: document.getElementById("identificationNumber").value,
+                    payer: {
+                        email: cardData.cardholderEmail,
+                        identification: {
+                            type: cardData.identificationType,
+                            number: cardData.identificationNumber
+                        }
+                    }
+                };
+                
+                console.log('📤 Enviando datos al servidor...');
+                
+                fetch("{{ url_for('carrito.procesar_pago_api', item_id=item.id) }}", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(datosPago)
+                })
+                .then(response => {
+                    console.log('📥 Respuesta recibida:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('📥 Datos del servidor:', data);
+                    
+                    if (data.success) {
+                        showSuccess(data.message || '✅ ¡Pago procesado exitosamente!');
+                        setTimeout(() => {
+                            window.location.href = "{{ url_for('carrito.ver_carrito') }}";
+                        }, 2000);
+                    } else {
+                        showError(data.message || '❌ Error al procesar el pago');
+                        btnPagar.disabled = false;
+                        loading.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error:', error);
+                    showError('❌ Error de conexión. Intenta nuevamente.');
+                    btnPagar.disabled = false;
+                    loading.style.display = 'none';
+                });
+
+            } catch (error) {
+                console.error('❌ Error al procesar el pago:', error);
+                showError('❌ Error al procesar el pago. Verifica los datos.');
+                btnPagar.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.className = 'error-message error';
+            errorDiv.style.display = 'block';
+        }
+
+        function showSuccess(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.className = 'error-message success';
+            errorDiv.style.display = 'block';
+        }
+
+    } catch (error) {
+        console.error('❌ Error inicializando MercadoPago:', error);
+        showError('❌ Error al inicializar el sistema de pagos');
+    }
+});
+</script>
+{% endblock %}

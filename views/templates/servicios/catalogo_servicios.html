@@ -109,7 +109,7 @@
                                class="btn btn-outline-primary btn-sm">
                                 <i class="fas fa-eye"></i> Ver Detalles
                             </a>
-                            <!-- CURSOR IA: Mostrar botón de agregar al carrito solo para organizadores -->
+                            <!-- Mostrar botón de agregar al carrito solo para organizadores -->
                             {% if es_organizador %}
                                 <a href="{{ url_for('servicio.agregar_al_carrito_desde_detalle', servicio_id=servicio.id) }}" 
                                    class="btn btn-success btn-sm">

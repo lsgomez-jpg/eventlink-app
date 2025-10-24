@@ -22,7 +22,7 @@ class EmailObserver(NotificacionObserver):
         
         if usuario and usuario.notificaciones_email:
             # Aquí se implementaría el envío real de email
-            print(f"📧 Email enviado a {usuario.correo}: {notificacion.titulo}")
+            print(f"[EMAIL] Email enviado a {usuario.correo}: {notificacion.titulo}")
             # TODO: Implementar envío real con Flask-Mail
 
 class PushObserver(NotificacionObserver):
@@ -34,7 +34,7 @@ class PushObserver(NotificacionObserver):
         
         if usuario and usuario.notificaciones_push:
             # Aquí se implementaría el envío real de push notification
-            print(f"🔔 Push notification enviada a {usuario.nombre}: {notificacion.titulo}")
+            print(f"[PUSH] Push notification enviada a {usuario.nombre}: {notificacion.titulo}")
             # TODO: Implementar envío real con Firebase o similar
 
 class DatabaseObserver(NotificacionObserver):
@@ -45,10 +45,10 @@ class DatabaseObserver(NotificacionObserver):
         try:
             db.session.add(notificacion)
             db.session.commit()
-            print(f"💾 Notificación guardada en BD: {notificacion.titulo}")
+            print(f"[DB] Notificación guardada en BD: {notificacion.titulo}")
         except Exception as e:
             db.session.rollback()
-            print(f"❌ Error al guardar notificación: {e}")
+            print(f"[ERROR] Error al guardar notificación: {e}")
 
 class LogObserver(NotificacionObserver):
     """Observer para logging de notificaciones"""
@@ -73,23 +73,23 @@ class SistemaNotificaciones:
         """Registra un nuevo observador"""
         if observador not in self._observadores:
             self._observadores.append(observador)
-            print(f"✅ Observador registrado: {type(observador).__name__}")
+            print(f"[OK] Observador registrado: {type(observador).__name__}")
     
     def desregistrar_observador(self, observador: NotificacionObserver):
         """Desregistra un observador"""
         if observador in self._observadores:
             self._observadores.remove(observador)
-            print(f"❌ Observador desregistrado: {type(observador).__name__}")
+            print(f"[OK] Observador desregistrado: {type(observador).__name__}")
     
     def notificar_observadores(self, notificacion: Notificacion):
         """Notifica a todos los observadores registrados"""
-        print(f"🔔 Notificando a {len(self._observadores)} observadores...")
+        print(f"[NOTIFY] Notificando a {len(self._observadores)} observadores...")
         
         for observador in self._observadores:
             try:
                 observador.actualizar(notificacion)
             except Exception as e:
-                print(f"❌ Error en observador {type(observador).__name__}: {e}")
+                print(f"[ERROR] Error en observador {type(observador).__name__}: {e}")
     
     def crear_notificacion(self, titulo: str, mensaje: str, tipo: TipoNotificacion, 
                           usuario_id: int, **kwargs) -> Notificacion:
@@ -127,7 +127,7 @@ class SistemaNotificaciones:
         if self._configuracion_global['logging']:
             self.registrar_observador(LogObserver())
         
-        print("🎯 Sistema de notificaciones configurado")
+        print("[OK] Sistema de notificaciones configurado")
     
     def obtener_estadisticas(self) -> Dict[str, Any]:
         """Obtiene estadísticas del sistema de notificaciones"""

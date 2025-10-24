@@ -1,6 +1,48 @@
 {% extends "base.html" %}
 
-{% block title %}EventLink - Inicio{% endblock %}
+{% block title %}EventLink - Inicio
+    <!-- Lazy Loading Inteligente -->
+    <script>
+        // Cargar imágenes del carrusel de forma inteligente
+        function loadCarouselImages() {
+            const carouselImages = document.querySelectorAll('.carousel-image[data-bg]');
+            carouselImages.forEach((img, index) => {
+                if (index === 0) {
+                    // Primera imagen inmediatamente
+                    const bgUrl = img.getAttribute('data-bg');
+                    if (bgUrl) img.style.backgroundImage = `url(${bgUrl})`;
+                } else {
+                    // Otras imágenes con delay
+                    setTimeout(() => {
+                        const bgUrl = img.getAttribute('data-bg');
+                        if (bgUrl) img.style.backgroundImage = `url(${bgUrl})`;
+                    }, index * 2000); // 2 segundos entre cada imagen
+                }
+            });
+        }
+
+        // Cargar cuando el carrusel esté visible
+        function initCarouselLazyLoading() {
+            const carousel = document.getElementById('heroCarousel');
+            if (carousel) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            loadCarouselImages();
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                });
+                observer.observe(carousel);
+            }
+        }
+
+        // Inicializar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            initCarouselLazyLoading();
+        });
+    </script>
+{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
@@ -40,8 +82,8 @@
         
         <div class="carousel-inner">
             <!-- Slide 1: Noche de evento -->
-            <div class="carousel-item active">
-                <div class="carousel-image" style="background-image: url('{{ url_for('static', filename='img/nocheevento.jpg') }}');">
+        <div class="carousel-item active">
+            <div class="carousel-image" style="background-image: url({{ url_for('static', filename='img/catering.jpg') }});" data-bg="{{ url_for('static', filename='img/catering.jpg') }}">
                     <div class="carousel-overlay">
                         <div class="container">
                             <div class="row justify-content-center">
@@ -59,7 +101,7 @@
             
             <!-- Slide 2: Catering -->
             <div class="carousel-item">
-                <div class="carousel-image" style="background-image: url('{{ url_for('static', filename='img/catering.jpg') }}');">
+                <div class="carousel-image" style="background-image: url({{ url_for('static', filename='img/catering.jpg') }});">
                     <div class="carousel-overlay">
                         <div class="container">
                             <div class="row justify-content-center">
@@ -82,7 +124,7 @@
             
             <!-- Slide 3: Fotografía -->
             <div class="carousel-item">
-                <div class="carousel-image" style="background-image: url('{{ url_for('static', filename='img/fotografia.jpg') }}');">
+                <div class="carousel-image" style="background-image: url({{ url_for('static', filename='img/fotografia.jpg') }});">
                     <div class="carousel-overlay">
                         <div class="container">
                             <div class="row justify-content-center">
@@ -105,7 +147,7 @@
             
             <!-- Slide 4: Decoración -->
             <div class="carousel-item">
-                <div class="carousel-image" style="background-image: url('{{ url_for('static', filename='img/decoracion_globos.jpg') }}');">
+                <div class="carousel-image" style="background-image: url({{ url_for('static', filename='img/decoracion_globos.jpg') }});">
                     <div class="carousel-overlay">
                         <div class="container">
                             <div class="row justify-content-center">
@@ -128,7 +170,7 @@
             
             <!-- Slide 5: DJ -->
             <div class="carousel-item">
-                <div class="carousel-image" style="background-image: url('{{ url_for('static', filename='img/dj.jpg') }}');">
+                <div class="carousel-image" style="background-image: url({{ url_for('static', filename='img/dj.jpg') }});">
                     <div class="carousel-overlay">
                         <div class="container">
                             <div class="row justify-content-center">
@@ -275,4 +317,46 @@
     </div>
 </div>
 
+
+    <!-- Lazy Loading Inteligente -->
+    <script>
+        // Cargar imágenes del carrusel de forma inteligente
+        function loadCarouselImages() {
+            const carouselImages = document.querySelectorAll('.carousel-image[data-bg]');
+            carouselImages.forEach((img, index) => {
+                if (index === 0) {
+                    // Primera imagen inmediatamente
+                    const bgUrl = img.getAttribute('data-bg');
+                    if (bgUrl) img.style.backgroundImage = `url(${bgUrl})`;
+                } else {
+                    // Otras imágenes con delay
+                    setTimeout(() => {
+                        const bgUrl = img.getAttribute('data-bg');
+                        if (bgUrl) img.style.backgroundImage = `url(${bgUrl})`;
+                    }, index * 2000); // 2 segundos entre cada imagen
+                }
+            });
+        }
+
+        // Cargar cuando el carrusel esté visible
+        function initCarouselLazyLoading() {
+            const carousel = document.getElementById('heroCarousel');
+            if (carousel) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            loadCarouselImages();
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                });
+                observer.observe(carousel);
+            }
+        }
+
+        // Inicializar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            initCarouselLazyLoading();
+        });
+    </script>
 {% endblock %}

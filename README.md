@@ -1,108 +1,44 @@
-# EventLink
+# 🎉 EventLink - Plataforma de Gestión de Eventos
 
-EventLink es una plataforma web que conecta organizadores de eventos con proveedores de servicios (catering, fotografía, sonido, decoración, logística, etc.). La plataforma permite a los usuarios buscar, comparar, contratar y pagar servicios de forma segura y centralizada.
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
+[![Flask](https://img.shields.io/badge/Flask-2.0+-green.svg)](https://flask.palletsprojects.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-12+-blue.svg)](https://postgresql.org)
+[![MercadoPago](https://img.shields.io/badge/MercadoPago-API-orange.svg)](https://mercadopago.com)
 
-## Características Principales
+## 📋 Descripción
 
-### Para Organizadores
-- ✅ Registro y gestión de perfil
-- ✅ Creación y gestión de eventos
-- ✅ Búsqueda de servicios con filtros avanzados
-- ✅ Contratación y pago seguro de servicios
-- ✅ Sistema de calificaciones y reseñas
-- ✅ Notificaciones en tiempo real
+EventLink es una plataforma web que conecta organizadores de eventos con proveedores de servicios, facilitando la contratación y gestión de eventos únicos.
 
-### Para Proveedores
-- ✅ Registro y gestión de perfil de servicios
-- ✅ Catálogo de servicios con precios flexibles
-- ✅ Recepción de solicitudes y contrataciones
-- ✅ Gestión de disponibilidad
-- ✅ Sistema de pagos garantizados
-- ✅ Construcción de reputación
+## 🚀 Características
 
-### Funcionalidades Generales
-- 🔐 Autenticación y autorización segura
-- 💳 Pasarelas de pago integradas (Stripe, MercadoPago)
-- 📱 Diseño responsive y moderno
-- 🔔 Sistema de notificaciones
-- ⭐ Sistema de calificaciones
-- 📊 Dashboard con estadísticas
+- **👥 Gestión de Usuarios**: Registro y autenticación para organizadores y proveedores
+- **🎉 Gestión de Eventos**: Creación, edición y seguimiento de eventos
+- **🛍️ Catálogo de Servicios**: Búsqueda y contratación de servicios
+- **💳 Pagos Integrados**: Integración con MercadoPago para pagos seguros
+- **📊 Estadísticas**: Dashboard con métricas y análisis
+- **🔔 Notificaciones**: Sistema de notificaciones en tiempo real
+- **⭐ Reseñas**: Sistema de calificaciones y comentarios
 
-## Arquitectura y Principios
+## 🛠️ Tecnologías
 
-### Principios SOLID
-- **S** - Single Responsibility: Cada módulo tiene una única responsabilidad
-- **O** - Open/Closed: Abierto a extensión, cerrado a modificación
-- **L** - Liskov Substitution: Las clases hijas pueden sustituir a las clases base
-- **I** - Interface Segregation: Interfaces específicas para cada rol
-- **D** - Dependency Inversion: Depende de abstracciones, no de implementaciones
+- **Backend**: Python, Flask, SQLAlchemy
+- **Base de Datos**: PostgreSQL
+- **Frontend**: HTML5, CSS3, JavaScript, Bootstrap 5
+- **Pagos**: MercadoPago API
+- **Patrones**: MVC, Factory, Observer, Singleton, Strategy
 
-### Patrones de Diseño Implementados
-- **MVC**: Separación clara entre Modelo, Vista y Controlador
-- **Factory Method**: Creación dinámica de servicios y notificaciones
-- **Observer**: Sistema de notificaciones en tiempo real
-- **Singleton**: Gestión de conexiones y pasarelas de pago
-- **Strategy**: Diferentes estrategias de búsqueda de servicios
+## 📦 Instalación
 
-## Estructura del Proyecto
-
-```
-eventlink/
-├── app.py                 # Aplicación principal
-├── config.py             # Configuraciones
-├── requirements.txt      # Dependencias
-├── models/               # Modelos de datos
-│   ├── __init__.py
-│   ├── usuario.py
-│   ├── evento.py
-│   ├── servicio.py
-│   ├── contratacion.py
-│   ├── calificacion.py
-│   └── notificacion.py
-├── controllers/          # Controladores (Lógica de negocio)
-│   ├── __init__.py
-│   ├── usuario_controller.py
-│   ├── evento_controller.py
-│   ├── servicio_controller.py
-│   ├── contratacion_controller.py
-│   └── pago_controller.py
-├── patterns/             # Patrones de diseño
-│   ├── __init__.py
-│   ├── factory.py
-│   ├── observer.py
-│   ├── singleton.py
-│   └── strategy.py
-├── rutas/               # Rutas y blueprints
-│   ├── __init__.py
-│   ├── usuario_rutas.py
-│   ├── evento_rutas.py
-│   ├── servicio_rutas.py
-│   ├── contratacion_rutas.py
-│   └── pago_rutas.py
-└── views/               # Vistas y plantillas
-    ├── templates/
-    │   ├── base.html
-    │   ├── index.html
-    │   ├── login.html
-    │   ├── registro.html
-    │   └── errors/
-    └── static/
-        ├── css/
-        └── js/
-```
-
-## Instalación y Configuración
-
-### Requisitos Previos
+### Requisitos
 - Python 3.8+
 - PostgreSQL 12+
 - pip
 
-### Pasos de Instalación
+### Pasos
 
 1. **Clonar el repositorio**
 ```bash
-git clone <repository-url>
+git clone https://github.com/tu-usuario/eventlink.git
 cd eventlink
 ```
 
@@ -120,174 +56,129 @@ pip install -r requirements.txt
 4. **Configurar base de datos**
 ```bash
 # Crear base de datos PostgreSQL
-createdb eventlink_db
+createdb eventlink
 
 # Configurar variables de entorno
-export DATABASE_URL="postgresql://usuario:contraseña@localhost/eventlink_db"
-export SECRET_KEY="tu-clave-secreta-aqui"
+export DATABASE_URL=postgresql://usuario:password@localhost/eventlink
+export SECRET_KEY=tu-clave-secreta-aqui
+export MERCADOPAGO_ACCESS_TOKEN=tu-token-mercadopago
 ```
 
 5. **Inicializar base de datos**
 ```bash
-flask db init
-flask db migrate -m "Initial migration"
-flask db upgrade
+python app.py
 ```
 
-6. **Ejecutar la aplicación**
+6. **Ejecutar aplicación**
 ```bash
 python app.py
 ```
 
-La aplicación estará disponible en `http://localhost:5000`
+## 🏗️ Estructura del Proyecto
 
-## Configuración de Variables de Entorno
+```
+eventlink/
+├── app.py                 # Aplicación principal
+├── config.py             # Configuraciones
+├── database.py           # Configuración de BD
+├── requirements.txt      # Dependencias
+├── controllers/          # Controladores MVC
+├── models/              # Modelos de datos
+├── rutas/               # Rutas de la aplicación
+├── views/               # Templates y assets
+│   ├── templates/       # Plantillas HTML
+│   └── static/         # CSS, JS, imágenes
+└── patterns/           # Patrones de diseño
+```
 
+## 🔧 Configuración
+
+### Variables de Entorno
 ```bash
-# Base de datos
-DATABASE_URL=postgresql://usuario:contraseña@localhost/eventlink_db
-
-# Seguridad
-SECRET_KEY=tu-clave-secreta-muy-segura
-
-# Email (opcional)
-MAIL_SERVER=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USE_TLS=True
-MAIL_USERNAME=tu-email@gmail.com
-MAIL_PASSWORD=tu-contraseña-de-aplicacion
-
-# Pagos (opcional)
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_PUBLISHABLE_KEY=pk_test_...
-MERCADOPAGO_ACCESS_TOKEN=TEST-...
-
-# Entorno
+DATABASE_URL=postgresql://usuario:password@localhost/eventlink
+SECRET_KEY=tu-clave-secreta-aqui
+MERCADOPAGO_ACCESS_TOKEN=tu-token-mercadopago
 FLASK_ENV=development  # o production
 ```
 
-## Uso de la Aplicación
+### Base de Datos
+El proyecto usa PostgreSQL con SQLAlchemy como ORM. Las tablas se crean automáticamente al ejecutar la aplicación.
 
-### Registro de Usuarios
-1. Acceder a `/usuario/registro`
-2. Seleccionar rol (Organizador o Proveedor)
-3. Completar información personal
-4. Verificar email (si está configurado)
+## 🚀 Uso
 
-### Para Organizadores
-1. **Crear Evento**: `/eventos/crear`
-2. **Buscar Servicios**: `/servicios/buscar`
-3. **Gestionar Contrataciones**: `/contrataciones/listar`
-4. **Realizar Pagos**: `/pagos/procesar/<id>`
+1. **Registro**: Los usuarios pueden registrarse como organizadores o proveedores
+2. **Eventos**: Los organizadores pueden crear y gestionar eventos
+3. **Servicios**: Los proveedores pueden ofrecer servicios
+4. **Contratación**: Los organizadores pueden contratar servicios
+5. **Pagos**: Integración con MercadoPago para pagos seguros
 
-### Para Proveedores
-1. **Crear Servicio**: `/servicios/crear`
-2. **Buscar Eventos**: `/eventos/buscar`
-3. **Gestionar Solicitudes**: `/contrataciones/listar`
-4. **Ver Pagos**: `/pagos/historial`
+## 📊 API Endpoints
 
-## API Endpoints
-
-### Autenticación
-- `POST /usuario/registro` - Registro de usuario
-- `POST /usuario/login` - Inicio de sesión
-- `GET /usuario/logout` - Cerrar sesión
+### Usuarios
+- `POST /registro` - Registro de usuarios
+- `POST /login` - Inicio de sesión
+- `GET /perfil` - Perfil de usuario
 
 ### Eventos
-- `GET /eventos/listar` - Listar eventos del usuario
-- `POST /eventos/crear` - Crear nuevo evento
-- `GET /eventos/<id>` - Ver detalle de evento
+- `GET /eventos` - Listar eventos
+- `POST /eventos/crear` - Crear evento
 - `PUT /eventos/<id>/editar` - Editar evento
 
 ### Servicios
-- `GET /servicios/listar` - Listar servicios del proveedor
-- `POST /servicios/crear` - Crear nuevo servicio
+- `GET /servicios` - Listar servicios
+- `POST /servicios/crear` - Crear servicio
 - `GET /servicios/buscar` - Buscar servicios
-- `POST /servicios/<id>/solicitar` - Solicitar servicio
-
-### Contrataciones
-- `GET /contrataciones/listar` - Listar contrataciones
-- `POST /contrataciones/<id>/aceptar` - Aceptar contratación
-- `POST /contrataciones/<id>/rechazar` - Rechazar contratación
-- `POST /contrataciones/<id>/completar` - Completar servicio
 
 ### Pagos
-- `POST /pagos/procesar/<id>` - Procesar pago
+- `POST /pagos/mercadopago` - Procesar pago
 - `GET /pagos/historial` - Historial de pagos
-- `GET /pagos/estadisticas` - Estadísticas de pagos
 
-## Tecnologías Utilizadas
+## 🧪 Testing
 
-### Backend
-- **Flask**: Framework web
-- **SQLAlchemy**: ORM para base de datos
-- **PostgreSQL**: Base de datos relacional
-- **Flask-Migrate**: Migraciones de base de datos
-- **Flask-Mail**: Envío de emails
+```bash
+# Ejecutar tests
+python -m pytest
 
-### Frontend
-- **Bootstrap 5**: Framework CSS
-- **Font Awesome**: Iconos
-- **JavaScript**: Interactividad
-- **Jinja2**: Motor de plantillas
+# Con cobertura
+python -m pytest --cov=.
+```
 
-### Pagos
-- **Stripe**: Pasarela de pago internacional
-- **MercadoPago**: Pasarela de pago latinoamericana
+## 📈 Performance
 
-### Patrones y Arquitectura
-- **MVC**: Arquitectura de aplicación
-- **SOLID**: Principios de diseño
-- **Factory Pattern**: Creación de objetos
-- **Observer Pattern**: Notificaciones
-- **Singleton Pattern**: Recursos compartidos
-- **Strategy Pattern**: Algoritmos de búsqueda
+- **Optimización de assets**: CSS y JS minificados
+- **Lazy loading**: Imágenes con carga diferida
+- **Cache**: Service Worker para assets estáticos
+- **CDN**: Recursos externos desde CDN
 
-## Contribución
+## 🤝 Contribución
 
 1. Fork el proyecto
-2. Crear una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
 3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
 4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir un Pull Request
+5. Abre un Pull Request
 
-## Licencia
+## 📝 Licencia
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
 
-## Soporte
+## 👥 Autores
 
-Para soporte técnico o preguntas:
-- Email: soporte@eventlink.com
-- Documentación: [docs.eventlink.com](https://docs.eventlink.com)
-- Issues: [GitHub Issues](https://github.com/eventlink/issues)
+- **Tu Nombre** - *Desarrollo inicial* - [tu-github](https://github.com/tu-usuario)
 
-## Roadmap
+## 🙏 Agradecimientos
 
-### Versión 1.1
-- [ ] Integración con mapas
-- [ ] Chat en tiempo real
-- [ ] Aplicación móvil
-- [ ] API REST completa
+- Flask y SQLAlchemy por el framework
+- Bootstrap por el diseño
+- MercadoPago por la integración de pagos
+- PostgreSQL por la base de datos
 
-### Versión 1.2
-- [ ] Sistema de subastas
-- [ ] Paquetes de servicios
-- [ ] Análisis avanzado
-- [ ] Integración con redes sociales
+## 📞 Contacto
+
+- **Email**: tu-email@ejemplo.com
+- **GitHub**: [tu-usuario](https://github.com/tu-usuario)
+- **LinkedIn**: [tu-perfil](https://linkedin.com/in/tu-perfil)
 
 ---
 
-**EventLink** - Conectando el mundo de los eventos 🎉
-
-
-
-
-
-
-
-
-
-
-
-
+⭐ **¡Si te gusta este proyecto, dale una estrella!** ⭐

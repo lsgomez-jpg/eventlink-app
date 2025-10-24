@@ -11,7 +11,6 @@ from models.evento import Evento
 from models.usuario import Usuario
 from database import db
 from datetime import datetime
-
 class CarritoController:
 
     @staticmethod
@@ -115,7 +114,7 @@ class CarritoController:
 
     @staticmethod
     def editar_item(item_id):
-        """Edita un item del carrito"""
+        """Muestra el formulario para editar un item del carrito"""
         if not CarritoController._usuario_autenticado():
             return CarritoController._acceso_no_autorizado()
 
@@ -129,9 +128,24 @@ class CarritoController:
             flash('Este item no puede ser editado', 'error')
             return redirect(url_for('carrito.ver_carrito'))
 
-        if request.method == 'GET':
-            eventos = Evento.query.filter_by(organizador_id=session['user_id']).all()
-            return render_template('carrito/editar_item.html', item=item, eventos=eventos)
+        eventos = Evento.query.filter_by(organizador_id=session['user_id']).all()
+        return render_template('carrito/editar_item.html', item=item, eventos=eventos)
+
+    @staticmethod
+    def actualizar_item(item_id):
+        """Actualiza un item del carrito"""
+        if not CarritoController._usuario_autenticado():
+            return CarritoController._acceso_no_autorizado()
+
+        item = CarritoItem.query.get_or_404(item_id)
+
+        if item.organizador_id != session['user_id']:
+            flash('No tienes permisos para editar este item', 'error')
+            return redirect(url_for('carrito.ver_carrito'))
+
+        if not item.puede_editar():
+            flash('Este item no puede ser editado', 'error')
+            return redirect(url_for('carrito.ver_carrito'))
 
         evento_id = request.form.get('evento_id', '').strip()
         fecha_evento = request.form.get('fecha_evento', '').strip()
@@ -140,21 +154,61 @@ class CarritoController:
         ubicacion = request.form.get('ubicacion', '').strip()
         notas_especiales = request.form.get('notas_especiales', '').strip()
 
+        # Validaciones
+        errores = []
+        if not evento_id:
+            errores.append('Debes seleccionar un evento')
+        if not fecha_evento:
+            errores.append('La fecha del servicio es obligatoria')
+        if not duracion_horas:
+            errores.append('La duración es obligatoria')
+        if not ubicacion:
+            errores.append('La ubicación es obligatoria')
+
+        if errores:
+            for error in errores:
+                flash(error, 'error')
+            eventos = Evento.query.filter_by(organizador_id=session['user_id']).all()
+            return render_template('carrito/editar_item.html', item=item, eventos=eventos)
+
         try:
+            # Verificar que el evento pertenezca al organizador
+            evento = Evento.query.filter_by(
+                id=evento_id, 
+                organizador_id=session['user_id']
+            ).first()
+
+            if not evento:
+                flash('El evento seleccionado no es válido', 'error')
+                eventos = Evento.query.filter_by(organizador_id=session['user_id']).all()
+                return render_template('carrito/editar_item.html', item=item, eventos=eventos)
+
+            # Actualizar los campos del item
             item.evento_id = evento_id
             item.fecha_evento = datetime.strptime(fecha_evento, '%Y-%m-%dT%H:%M')
             item.duracion_horas = int(duracion_horas)
             item.numero_personas = int(numero_personas) if numero_personas else None
             item.ubicacion = ubicacion
             item.notas_especiales = notas_especiales
+            
+            # Recalcular precios
             item._calcular_precios()
+            
+            # Actualizar fecha de modificación
+            item.fecha_actualizacion = datetime.utcnow()
+            
             db.session.commit()
             flash('Item actualizado exitosamente', 'success')
             return redirect(url_for('carrito.ver_carrito'))
 
-        except Exception:
+        except ValueError as e:
             db.session.rollback()
-            flash('Error al actualizar el item', 'error')
+            flash('Error en el formato de fecha', 'error')
+            eventos = Evento.query.filter_by(organizador_id=session['user_id']).all()
+            return render_template('carrito/editar_item.html', item=item, eventos=eventos)
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al actualizar el item: {str(e)}', 'error')
             eventos = Evento.query.filter_by(organizador_id=session['user_id']).all()
             return render_template('carrito/editar_item.html', item=item, eventos=eventos)
 
@@ -197,13 +251,13 @@ class CarritoController:
     @staticmethod
     def pago_mercadopago(item_id):
         """
-        Muestra el formulario de pago para un item específico del carrito
+        Redirige directamente a MercadoPago para un item específico del carrito
         
         Args:
             item_id (int): ID del item del carrito a procesar
             
         Returns:
-            Response: Renderizado del formulario de pago
+            Response: Redirección a MercadoPago
         """
         # 1. Verificar autenticación
         if not CarritoController._usuario_autenticado():
@@ -235,15 +289,306 @@ class CarritoController:
                 flash('Este item ya fue procesado o no está disponible', 'error')
                 return redirect(url_for('carrito.ver_carrito'))
             
-            # 6. Mostrar formulario de pago
-            return render_template('carrito/pago_mercadopago.html', 
-                                 item=item, 
-                                 total=item.precio_total)
+            # 6. Redirigir directamente a MercadoPago
+            from patterns.singleton import PaymentGateway
+            from models.pago import Pago, MetodoPago, EstadoPago
+            from models.contratacion import Contratacion, EstadoContratacion
+            
+            # Crear contratación primero
+            contratacion = Contratacion(
+                servicio_id=item.servicio_id,
+                evento_id=item.evento_id,
+                organizador_id=item.organizador_id,
+                proveedor_id=item.servicio.proveedor_id,
+                fecha_evento=item.fecha_evento,
+                duracion_horas=item.duracion_horas,
+                numero_personas=item.numero_personas,
+                ubicacion=item.ubicacion,
+                notas_especiales=item.notas_especiales,
+                precio_total=item.precio_total,
+                deposito_requerido=0,
+                estado=EstadoContratacion.solicitada
+            )
+            db.session.add(contratacion)
+            db.session.flush()
+            
+            # Crear registro de pago
+            pago = Pago(
+                contratacion_id=contratacion.id,
+                organizador_id=item.organizador_id,
+                monto=item.precio_total,
+                metodo_pago=MetodoPago.mercadopago,
+                estado=EstadoPago.pendiente,
+                nombre_titular=session.get('user_name', 'Usuario'),
+                email_pagador=session.get('user_email', 'usuario@eventlink.com'),
+                telefono_pagador=session.get('user_phone', ''),
+                documento_pagador=session.get('user_document', ''),
+                datos_adicionales={
+                    'item_carrito_id': item.id,
+                    'servicio_id': item.servicio_id,
+                    'evento_id': item.evento_id
+                }
+            )
+            db.session.add(pago)
+            db.session.flush()
+            
+            # Procesar con MercadoPago
+            payment_gateway = PaymentGateway()
+            resultado_mp = payment_gateway.procesar_pago_mercadopago(
+                monto=item.precio_total,
+                descripcion=f"Servicio: {item.servicio.nombre} - Evento: {item.evento.titulo}",
+                email_pagador=session.get('user_email', 'usuario@eventlink.com')
+            )
+            
+            if resultado_mp.get('success'):
+                # Guardar datos y redirigir
+                pago.datos_adicionales['mercadopago_id'] = resultado_mp.get('payment_id')
+                pago.datos_adicionales['url_pago'] = resultado_mp.get('url_pago')
+                db.session.commit()
+                
+                # Redirigir directamente a MercadoPago
+                return redirect(resultado_mp.get('url_pago'))
+            else:
+                pago.estado = EstadoPago.rechazado
+                pago.datos_adicionales['error'] = resultado_mp.get('message', 'Error desconocido')
+                db.session.commit()
+                flash(f'Error al crear el pago: {resultado_mp.get("message", "Error desconocido")}', 'error')
+                return redirect(url_for('carrito.ver_carrito'))
             
         except Exception as e:
             print(f"❌ Error en pago_mercadopago: {e}")
+            flash(f'Error al procesar el pago: {str(e)}', 'error')
+            return redirect(url_for('carrito.ver_carrito'))
+    
+    @staticmethod
+    def checkout_api(item_id):
+        """
+        Muestra el formulario de pago personalizado con Checkout API
+        
+        Args:
+            item_id (int): ID del item del carrito a procesar
+            
+        Returns:
+            Response: Renderizado del formulario de pago personalizado
+        """
+        # 1. Verificar autenticación
+        if not CarritoController._usuario_autenticado():
+            return CarritoController._acceso_no_autorizado()
+        
+        # 2. Verificar rol de organizador
+        if session['user_rol'] != 'organizador':
+            flash('Solo los organizadores pueden procesar pagos', 'error')
+            return redirect(url_for('index'))
+        
+        try:
+            # 3. Obtener el item del carrito
+            item = CarritoItem.query.filter_by(
+                id=item_id,
+                organizador_id=session['user_id']
+            ).first()
+            
+            if not item:
+                flash('Item del carrito no encontrado', 'error')
+                return redirect(url_for('carrito.ver_carrito'))
+            
+            # 4. Verificar que el usuario sea el dueño del item
+            if item.organizador_id != session['user_id']:
+                flash('No tienes permisos para procesar este item', 'error')
+                return redirect(url_for('carrito.ver_carrito'))
+            
+            # 5. Verificar que el item esté en estado pendiente
+            if not item.esta_pendiente():
+                flash('Este item ya fue procesado o no está disponible', 'error')
+                return redirect(url_for('carrito.ver_carrito'))
+            
+            # 6. Crear una contratación real para el pago
+            from models.contratacion import Contratacion, EstadoContratacion
+            
+            # Crear contratación real en la base de datos
+            contratacion = Contratacion(
+                servicio_id=item.servicio_id,
+                evento_id=item.evento.id,
+                organizador_id=item.organizador_id,
+                proveedor_id=item.servicio.proveedor_id,
+                fecha_evento=item.fecha_evento,
+                duracion_horas=item.duracion_horas,
+                numero_personas=item.numero_personas,
+                ubicacion=item.ubicacion,
+                notas_especiales=item.notas_especiales,
+                precio_total=item.precio_total,
+                deposito_requerido=0,
+                estado=EstadoContratacion.solicitada
+            )
+            db.session.add(contratacion)
+            db.session.commit()
+            
+            print(f"✅ Contratación creada con ID: {contratacion.id}")
+            
+            # Mostrar formulario de pago con MercadoPago Checkout API
+            return render_template('pagos/procesar_pago.html', contratacion=contratacion, item=item)
+            
+        except Exception as e:
+            print(f"❌ Error en checkout_api: {e}")
             flash(f'Error al cargar el formulario de pago: {str(e)}', 'error')
             return redirect(url_for('carrito.ver_carrito'))
+    
+    @staticmethod
+    def procesar_pago_api(item_id):
+        """
+        Procesa el pago usando Checkout API (recibe token de tarjeta)
+        
+        Args:
+            item_id (int): ID del item del carrito a procesar
+            
+        Returns:
+            Response: JSON con el resultado del pago
+        """
+        from flask import jsonify
+        from patterns.singleton import PaymentGateway
+        from models.pago import Pago, MetodoPago, EstadoPago
+        from models.contratacion import Contratacion, EstadoContratacion
+        
+        # 1. Verificar autenticación
+        if not CarritoController._usuario_autenticado():
+            return jsonify({'success': False, 'message': 'No autorizado'}), 401
+        
+        # 2. Verificar rol de organizador
+        if session['user_rol'] != 'organizador':
+            return jsonify({'success': False, 'message': 'Solo organizadores pueden procesar pagos'}), 403
+        
+        try:
+            # 3. Obtener datos del request
+            data = request.get_json()
+            if not data:
+                return jsonify({'success': False, 'message': 'Datos de pago requeridos'}), 400
+            
+            # 4. Obtener el item del carrito
+            item = CarritoItem.query.filter_by(
+                id=item_id,
+                organizador_id=session['user_id']
+            ).first()
+            
+            if not item:
+                return jsonify({'success': False, 'message': 'Item del carrito no encontrado'}), 404
+            
+            # 5. Verificar que el item esté en estado pendiente
+            if not item.esta_pendiente():
+                return jsonify({'success': False, 'message': 'Este item ya fue procesado'}), 400
+            
+            # 6. Crear contratación
+            contratacion = Contratacion(
+                servicio_id=item.servicio_id,
+                evento_id=item.evento_id,
+                organizador_id=item.organizador_id,
+                proveedor_id=item.servicio.proveedor_id,
+                fecha_evento=item.fecha_evento,
+                duracion_horas=item.duracion_horas,
+                numero_personas=item.numero_personas,
+                ubicacion=item.ubicacion,
+                notas_especiales=item.notas_especiales,
+                precio_total=item.precio_total,
+                deposito_requerido=0,
+                estado=EstadoContratacion.solicitada
+            )
+            db.session.add(contratacion)
+            db.session.flush()
+            
+            # 7. Crear registro de pago
+            pago = Pago(
+                contratacion_id=contratacion.id,
+                organizador_id=item.organizador_id,
+                monto=item.precio_total,
+                metodo_pago=MetodoPago.mercadopago,
+                estado=EstadoPago.pendiente,
+                nombre_titular=data.get('payer', {}).get('email', session.get('user_name', 'Usuario')),
+                email_pagador=data.get('payer', {}).get('email', session.get('user_email', 'usuario@eventlink.com')),
+                telefono_pagador=session.get('user_phone', ''),
+                documento_pagador=data.get('payer', {}).get('identification', {}).get('number', ''),
+                datos_adicionales={
+                    'item_carrito_id': item.id,
+                    'servicio_id': item.servicio_id,
+                    'evento_id': item.evento_id,
+                    'payment_method_id': data.get('payment_method_id'),
+                    'installments': data.get('installments', 1),
+                    'issuer_id': data.get('issuer_id')
+                }
+            )
+            db.session.add(pago)
+            db.session.flush()
+            
+            # 8. Procesar pago con MercadoPago
+            payment_gateway = PaymentGateway()
+            resultado_mp = payment_gateway.procesar_pago_checkout_api(
+                monto=item.precio_total,
+                descripcion=f"Servicio: {item.servicio.nombre} - Evento: {item.evento.titulo}",
+                token=data.get('token'),
+                payment_method_id=data.get('payment_method_id'),
+                installments=data.get('installments', 1),
+                issuer_id=data.get('issuer_id'),
+                payer=data.get('payer', {})
+            )
+            
+            if resultado_mp.get('success'):
+                # 9. Actualizar estado del pago
+                payment_status = resultado_mp.get('estado', 'pending')
+                if payment_status == 'approved':
+                    pago.estado = EstadoPago.aprobado
+                    item.estado = EstadoCarritoItem.procesando
+                    message = '¡Pago procesado exitosamente!'
+                elif payment_status == 'rejected':
+                    pago.estado = EstadoPago.rechazado
+                    message = 'El pago fue rechazado'
+                else:
+                    pago.estado = EstadoPago.pendiente
+                    message = 'Pago pendiente de confirmación'
+                
+                # Guardar datos adicionales
+                pago.datos_adicionales['mercadopago_id'] = resultado_mp.get('payment_id')
+                pago.datos_adicionales['mercadopago_response'] = resultado_mp.get('response', {})
+                db.session.commit()
+                
+                return jsonify({
+                    'success': True,
+                    'message': message,
+                    'payment_id': resultado_mp.get('payment_id'),
+                    'estado': payment_status
+                })
+            else:
+                # Error en el pago
+                pago.estado = EstadoPago.rechazado
+                pago.datos_adicionales['error'] = resultado_mp.get('message', 'Error desconocido')
+                db.session.commit()
+                
+                return jsonify({
+                    'success': False,
+                    'message': resultado_mp.get('message', 'Error al procesar el pago')
+                }), 400
+            
+        except Exception as e:
+            print(f"❌ Error en procesar_pago_api: {e}")
+            return jsonify({
+                'success': False,
+                'message': f'Error interno: {str(e)}'
+            }), 500
+    
+    @staticmethod
+    def mercadopago_public_key():
+        """
+        Devuelve la public key de MercadoPago para el frontend
+        
+        Returns:
+            Response: JSON con la public key
+        """
+        from flask import jsonify
+        
+        # Public key de prueba para sandbox
+        # Public Key real de MercadoPago
+        public_key = "TEST-f337044d-548b-4395-8b18-ee976a52ea42"
+        
+        return jsonify({
+            'public_key': public_key,
+            'mode': 'sandbox'
+        })
     
     @staticmethod
     def procesar_pago():
@@ -549,6 +894,7 @@ class CarritoController:
                     # Crear pago
                     pago = Pago(
                         contratacion_id=contratacion.id,
+                        organizador_id=item.organizador_id,
                         monto=item.precio_total,
                         metodo_pago=MetodoPago.mercadopago,
                         estado=EstadoPago.completado,
@@ -749,10 +1095,68 @@ class CarritoController:
                 return redirect(url_for('carrito.ver_carrito'))
             
             if request.method == 'GET':
-                # Mostrar formulario de pago con MercadoPago
-                return render_template('carrito/pago_mercadopago.html', 
-                                       item=item, 
-                                       total=item.precio_total)
+                # Redirigir directamente a MercadoPago sin formulario
+                from patterns.singleton import PaymentGateway
+                from models.pago import Pago, MetodoPago, EstadoPago
+                from models.contratacion import Contratacion, EstadoContratacion
+                
+                # Crear contratación primero
+                contratacion = Contratacion(
+                    servicio_id=item.servicio_id,
+                    evento_id=item.evento_id,
+                    organizador_id=item.organizador_id,
+                    proveedor_id=item.servicio.proveedor_id,
+                    fecha_evento=item.fecha_evento,
+                    duracion_horas=item.duracion_horas,
+                    numero_personas=item.numero_personas,
+                    ubicacion=item.ubicacion,
+                    notas_especiales=item.notas_especiales,
+                    precio_total=item.precio_total,
+                    deposito_requerido=0,
+                    estado=EstadoContratacion.solicitada
+                )
+                db.session.add(contratacion)
+                db.session.flush()
+                
+                # Crear registro de pago
+                pago = Pago(
+                    contratacion_id=contratacion.id,
+                    organizador_id=item.organizador_id,
+                    monto=item.precio_total,
+                    metodo_pago=MetodoPago.mercadopago,
+                    estado=EstadoPago.pendiente,
+                    nombre_titular=session.get('user_name', 'Usuario'),
+                    email_pagador=session.get('user_email', 'usuario@eventlink.com'),
+                    telefono_pagador=session.get('user_phone', ''),
+                    documento_pagador=session.get('user_document', ''),
+                    datos_adicionales={
+                        'item_carrito_id': item.id,
+                        'servicio_id': item.servicio_id,
+                        'evento_id': item.evento_id
+                    }
+                )
+                db.session.add(pago)
+                db.session.flush()
+                
+                # Procesar con MercadoPago
+                payment_gateway = PaymentGateway()
+                resultado_mp = payment_gateway.procesar_pago_mercadopago(
+                    monto=item.precio_total,
+                    descripcion=f"Servicio: {item.servicio.nombre} - Evento: {item.evento.titulo}",
+                    email_pagador=session.get('user_email', 'usuario@eventlink.com')
+                )
+                
+                if resultado_mp.get('success'):
+                    # Guardar datos y redirigir
+                    pago.datos_adicionales['mercadopago_id'] = resultado_mp.get('payment_id')
+                    pago.datos_adicionales['url_pago'] = resultado_mp.get('url_pago')
+                    db.session.commit()
+                    
+                    # Redirigir directamente a MercadoPago
+                    return redirect(resultado_mp.get('url_pago'))
+                else:
+                    flash(f'Error al crear el pago: {resultado_mp.get("message", "Error desconocido")}', 'error')
+                    return redirect(url_for('carrito.ver_carrito'))
             
             # Obtener datos del formulario
             nombre_titular = request.form.get('nombre_titular', '').strip()
@@ -795,7 +1199,7 @@ class CarritoController:
                 notas_especiales=item.notas_especiales,
                 precio_total=item.precio_total,
                 deposito_requerido=0,
-                estado=EstadoContratacion.pendiente
+                estado=EstadoContratacion.solicitada
             )
             db.session.add(contratacion)
             db.session.flush()
@@ -804,6 +1208,7 @@ class CarritoController:
             # Crear registro de pago
             pago = Pago(
                 contratacion_id=contratacion.id,
+                organizador_id=item.organizador_id,
                 monto=item.precio_total,
                 metodo_pago=MetodoPago.mercadopago,
                 estado=EstadoPago.pendiente,
@@ -830,14 +1235,16 @@ class CarritoController:
             )
             
             if resultado_mp.get('success'):
-                pago.estado = EstadoPago.completado
+                # NO marcar como aprobado aún - solo guardar la preferencia
+                pago.estado = EstadoPago.pendiente
                 pago.datos_adicionales['mercadopago_id'] = resultado_mp.get('payment_id')
-                item.estado = EstadoCarritoItem.completado
+                pago.datos_adicionales['url_pago'] = resultado_mp.get('url_pago')
                 db.session.commit()
-                flash('¡Pago procesado exitosamente! El servicio ha sido contratado.', 'success')
-                return redirect(url_for('contratacion.detalle_contratacion', contratacion_id=contratacion.id))
+                
+                # Redirigir directamente a MercadoPago
+                return redirect(resultado_mp.get('url_pago'))
             else:
-                pago.estado = EstadoPago.fallido
+                pago.estado = EstadoPago.rechazado
                 pago.datos_adicionales['error'] = resultado_mp.get('message', 'Error desconocido')
                 db.session.commit()
                 flash(f'Error al procesar el pago: {resultado_mp.get("message", "Error desconocido")}', 'error')

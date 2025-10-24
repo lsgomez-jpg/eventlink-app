@@ -41,9 +41,15 @@ class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     WTF_CSRF_ENABLED = False
 
-# diccionario de configuraciones
-config = {
-    "development": DevelopmentConfig,
-    "testing": TestingConfig,
-    "default": DevelopmentConfig
-}
+# función para obtener la configuración según el entorno
+def get_config(environment="development"):
+    """
+    Retorna la clase de configuración según el entorno especificado.
+    Solo se ejecuta la clase que se solicita.
+    """
+    configs = {
+        "development": DevelopmentConfig,
+        "testing": TestingConfig,
+        "default": DevelopmentConfig
+    }
+    return configs.get(environment, configs["default"])

@@ -106,7 +106,7 @@ class ServicioController:
         if not ServicioController._usuario_autenticado():
             return ServicioController._acceso_no_autorizado()
         
-        # CURSOR IA: Lógica diferenciada por rol
+        # Lógica diferenciada por rol
         if session['user_rol'] == 'proveedor':
             # El proveedor ve solo sus servicios
             servicios = Servicio.query.filter_by(proveedor_id=session['user_id']).order_by(
@@ -121,7 +121,7 @@ class ServicioController:
         # Obtener categorías para filtros
         categorias = list(CategoriaServicio)
         
-        # CURSOR IA: Determinar si el usuario es organizador para mostrar botones de agregar al carrito
+        # Determinar si el usuario es organizador para mostrar botones de agregar al carrito
         es_organizador = session.get('user_rol') == 'organizador'
         
         return render_template('servicios/catalogo_servicios.html', 
@@ -134,12 +134,12 @@ class ServicioController:
         """Muestra el detalle de un servicio"""
         servicio = Servicio.query.get_or_404(servicio_id)
         
-        # CURSOR IA: Verificar permisos para edición (solo proveedores)
+        # Verificar permisos para edición (solo proveedores)
         puede_editar = (ServicioController._usuario_autenticado() and 
                        session['user_rol'] == 'proveedor' and
                        session['user_id'] == servicio.proveedor_id)
         
-        # CURSOR IA: Verificar si el usuario puede agregar al carrito (solo organizadores)
+        # Verificar si el usuario puede agregar al carrito (solo organizadores)
         puede_agregar_carrito = (ServicioController._usuario_autenticado() and 
                                 session['user_rol'] == 'organizador')
         
@@ -148,7 +148,7 @@ class ServicioController:
         if puede_editar:
             contrataciones = Contratacion.query.filter_by(servicio_id=servicio_id).all()
         
-        # CURSOR IA: Obtener eventos del organizador si puede agregar al carrito
+        # Obtener eventos del organizador si puede agregar al carrito
         eventos = []
         if puede_agregar_carrito:
             from models.evento import Evento
@@ -305,7 +305,7 @@ class ServicioController:
                                  datos=datos)
         
         try:
-            # CURSOR IA: Actualizar servicio con conversión correcta de tipos
+            # Actualizar servicio con conversión correcta de tipos
             servicio.nombre = datos['nombre']
             servicio.descripcion = datos['descripcion']
             servicio.categoria = CategoriaServicio(datos['categoria'])
@@ -394,7 +394,7 @@ class ServicioController:
         if not ServicioController._usuario_autenticado():
             return ServicioController._acceso_no_autorizado()
         
-        # CURSOR IA: Permitir búsqueda a todos los usuarios autenticados
+        # Permitir búsqueda a todos los usuarios autenticados
         # Los filtros se aplicarán según el rol del usuario
         
         # Obtener parámetros de búsqueda
@@ -454,7 +454,7 @@ class ServicioController:
         tipo_busqueda = request.args.get('tipo_busqueda', 'combinada')
         
         try:
-            # CURSOR IA: Búsqueda diferenciada por rol
+            # Búsqueda diferenciada por rol
             if session['user_rol'] == 'proveedor':
                 # El proveedor ve solo sus servicios
                 servicios = Servicio.query.filter_by(proveedor_id=session['user_id']).order_by(

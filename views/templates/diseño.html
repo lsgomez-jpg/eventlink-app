@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block titulo %}EventLink{% endblock %}</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
@@ -30,18 +30,18 @@
           <li class="nav-item"><a class="nav-link enlace" href="#">Servicios</a></li>
           <li class="nav-item"><a class="nav-link enlace" href="#">Carrito</a></li>
 
-          {% if session.get("usuario_id") %}
+          {% if session.get("user_id") %}
             <!-- Usuario con sesión iniciada -->
             <li class="nav-item">
               <a class="nav-link enlace" href="{{ url_for('dashboard') }}">
-                Bienvenido, {{ session["usuario_nombre"] }}
+                Bienvenido, {{ session["user_nombre"] }}
               </a>
             </li>
-            <li class="nav-item"><a class="nav-link enlace" href="{{ url_for('logout') }}">Cerrar sesión</a></li>
+            <li class="nav-item"><a class="nav-link enlace" href="{{ url_for('usuario.logout') }}">Cerrar sesión</a></li>
           {% else %}
             <!-- Usuario sin sesión -->
-            <li class="nav-item"><a class="nav-link enlace" href="{{ url_for('login') }}">Iniciar sesión</a></li>
-            <li class="nav-item"><a class="nav-link enlace" href="{{ url_for('registro') }}">Registrarse</a></li>
+            <li class="nav-item"><a class="nav-link enlace" href="{{ url_for('usuario.login') }}">Iniciar sesión</a></li>
+            <li class="nav-item"><a class="nav-link enlace" href="{{ url_for('usuario.registro') }}">Registrarse</a></li>
           {% endif %}
         </ul>
       </div>
